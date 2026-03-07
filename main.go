@@ -4,21 +4,29 @@ import (
 	"fmt"
 	"os"
 	"net/http"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
 
+	godotenv.Load() 				// get values from .env 
 	port := os.Getenv("PORT")
 
 	// server mux
-	serverMux := http.NewServerMux()
+	serverMux := http.NewServeMux()
 
 	// server
+	address := fmt.Sprintf(":%s", port)
 	cardinalServer := http.Server{
-		Addr: ":" + port,
+		Addr: address,
 		Handler: serverMux,
 	}
 	fmt.Printf("Serving on: http://localhost:%s\n", port)
+
+	// create handler
+	handler := http.FileServer(http.Dir("."))
+	serverMux.Handle("/", handler)
 
 	// start server
 	err := cardinalServer.ListenAndServe()
