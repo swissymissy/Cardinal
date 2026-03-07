@@ -14,19 +14,19 @@ func main() {
 	port := os.Getenv("PORT")
 
 	// server mux
-	serverMux := http.NewServeMux()
+	mux := http.NewServeMux()
 
 	// server
 	address := fmt.Sprintf(":%s", port)
 	cardinalServer := http.Server{
 		Addr: address,
-		Handler: serverMux,
+		Handler: mux,
 	}
 	fmt.Printf("Serving on: http://localhost:%s\n", port)
 
 	// create handler
 	handler := http.FileServer(http.Dir("."))
-	serverMux.Handle("/", handler)
+	mux.Handle("/", handler)
 
 	// start server
 	err := cardinalServer.ListenAndServe()
