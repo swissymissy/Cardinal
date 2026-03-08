@@ -6,6 +6,7 @@ import (
 
 // struct to hold stateful data
 type ApiConfig struct {
-	DB 		*database.Queries
-	Port	string
+	DB 				*database.Queries
+	Port			string
+	Platform 		string
 }
