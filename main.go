@@ -18,6 +18,7 @@ func main() {
 	// get values from .env 
 	godotenv.Load() 				
 	port := os.Getenv("PORT")					// load port 
+	platform := os.Getenv("PLATFORM")			// check if is dev
 	dbURL := os.Getenv("DB_URL")				// load db url
 
 	// open connection to database
@@ -32,6 +33,7 @@ func main() {
 	apicfg := &handler.ApiConfig{
 		DB: dbQuery,
 		Port: port,
+		Platform: platform,
 	}
 
 	// server mux
@@ -50,6 +52,8 @@ func main() {
 
 	// handle request
 	mux.HandleFunc("POST /api/newuser", apicfg.HandlerCreateUser)
+	mux.HandleFunc("POST /admin/reset", apicfg.HandlerResetUsers)
+	mux.HandleFunc("POST /api/userlogin", apicfg.HandlerUserLogin)
 
 	// start server
 	err = cardinalServer.ListenAndServe()

@@ -15,4 +15,10 @@ type User struct {
 
 type NewUser struct {
 	Email		string 		`json:"email"`
+	Password 	string      `json:"password"`
+}
+
+type Chirp struct {
+	Body	string		`json:"body"`
+	UserID  uuid.UUID	`json:"user_id"`
 }
