@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/swissymissy/Cardinal/internal/auth"
+	"github.com/swissymissy/Cardinal/internal/database"
 )
 
 // handle create new user
@@ -22,9 +23,9 @@ func (apicfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Reques
 	userPassword := newUser.Password
 
 	// hash password
-	hashed, err = auth.HashPassword(userPassword)
+	hashed, err := auth.HashPassword(userPassword)
 	if err != nil {
-		fmt.Print("Error hashing password: %s", err)
+		fmt.Printf("Error hashing password: %s", err)
 		ResponseWithError(w, 500, "Something went wrong")
 		return
 	}
@@ -41,7 +42,7 @@ func (apicfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Reques
 	}
 
 	// response back to client
-	ResponseWithJSON(w, 200, User{
+	ResponseWithJSON(w, 201, User{
 		ID: user.ID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,

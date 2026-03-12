@@ -17,7 +17,7 @@ func HashPassword(password string ) (string, error) {
 
 // check password and hash 
 func CheckPasswordHash(password, hash string) (bool, error) {
-	match err := argon2id.ComparePasswordAndHash(password, hash)
+	match,err := argon2id.ComparePasswordAndHash(password, hash)
 	if err != nil {
 		return false, fmt.Errorf("Error matching password and hash: %w", err)
 	}
