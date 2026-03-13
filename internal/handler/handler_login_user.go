@@ -7,6 +7,7 @@ import (
 	"database/sql"
 
 	"github.com/swissymissy/Cardinal/internal/auth"
+	"github.com/swissymissy/Cardinal/internal/database"
 )
 
 func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +58,7 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 	refreshToken, err := auth.MakeRefreshToken()
 	if err != nil {
 		fmt.Printf("Error making new refresh token: %s\n", err)
-		respondWithError(w, 400, "Something went wrong")
+		ResponseWithError(w, 400, "Something went wrong")
 		return
 	}
 	// store refresh token in database
@@ -78,6 +79,7 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 		UpdatedAt: userInfo.UpdatedAt,
 		Email: userInfo.Email,
 		AccessToken: accessToken,
+		RefreshToken: refreshToken,
 	})
 
 } 

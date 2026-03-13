@@ -9,13 +9,13 @@ import (
 )
 
 // create new access token for user
-func MakeJWT(userID uuid.UUID, serverSecretToken string, expiresIn time.Duration ) (string, error) {
+func MakeJWT(userID uuid.UUID, serverSecretToken string) (string, error) {
 
 	//create a new registered claim
 	claim := jwt.RegisteredClaims{
 		Issuer: "Cardinal-access",
 		IssuedAt: jwt.NewNumericDate(time.Now().UTC()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(expiresIn)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 		Subject: userID.String(),
 	}
 	//create new token

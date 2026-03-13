@@ -24,11 +24,11 @@ type LoginUser struct {
 	UpdatedAt	time.Time	`json:"updated_at"`
 	Email		string		`json:"email"`
 	AccessToken string  	`json:"access_token"`
+	RefreshToken string		`json:"refresh_token"`
 }
 
 type Chirp struct {
 	Body	string		`json:"body"`
-	UserID  uuid.UUID	`json:"user_id"`
 }
 
 type CreatedChirp struct {

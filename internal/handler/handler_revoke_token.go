@@ -13,7 +13,7 @@ func (apicfg *ApiConfig) HandlerRevokeRefreshToken(w http.ResponseWriter, r *htt
 	refreshToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		fmt.Printf("Error getting token from header: %s", err)
-		RespondWithError(w, 401, "Invalid token")
+		ResponseWithError(w, 401, "Invalid token")
 		return
 	}
 
@@ -21,7 +21,7 @@ func (apicfg *ApiConfig) HandlerRevokeRefreshToken(w http.ResponseWriter, r *htt
 	user, err := apicfg.DB.GetUserFromRefreshToken(r.Context(), refreshToken)
 	if err != nil {
 		fmt.Printf("Can't find user: %s", err)
-		RespondWithError(w, 401, "Invalid Token")
+		ResponseWithError(w, 401, "Invalid Token")
 		return
 	}
 
@@ -30,7 +30,7 @@ func (apicfg *ApiConfig) HandlerRevokeRefreshToken(w http.ResponseWriter, r *htt
 	err = apicfg.DB.RevokedToken(r.Context(), refreshTokenDB)
 	if err != nil {
 		fmt.Printf("Error revoking refresh token: %s", err)
-		RespondWithError(w, 500, "Something went wrong")
+		ResponseWithError(w, 500, "Something went wrong")
 		return
 	}
 	w.WriteHeader(204)

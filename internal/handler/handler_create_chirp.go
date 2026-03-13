@@ -15,7 +15,7 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 	var newChirp Chirp 
 	err := DecodeRequest(r, &newChirp)
 	if err != nil {
-		fmt.Printf("Error decoding request: %s")
+		fmt.Printf("Error decoding request: %s", err)
 		msg := "Something went wrong"
 		ResponseWithError(w, 500, msg )
 		return
@@ -37,7 +37,7 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 	}
 	
 	chirpBody := newChirp.Body
-	author := newChirp.UserID
+	author := userID
 
 	err = CheckChirp(&newChirp) 
 	if err != nil {
