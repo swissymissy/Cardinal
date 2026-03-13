@@ -20,6 +20,7 @@ func main() {
 	port := os.Getenv("PORT")					// load port 
 	platform := os.Getenv("PLATFORM")			// check if is dev
 	dbURL := os.Getenv("DB_URL")				// load db url
+	jwtSecret := os.Getenv("JWT_SECRET")		// load jwt secret
 
 	// open connection to database
 	db, err := sql.Open("postgres", dbURL)
@@ -34,6 +35,7 @@ func main() {
 		DB: dbQuery,
 		Port: port,
 		Platform: platform,
+		JWTSecret: jwtSecret,
 	}
 
 	// server mux
@@ -54,6 +56,8 @@ func main() {
 	mux.HandleFunc("POST /api/newuser", apicfg.HandlerCreateUser)
 	mux.HandleFunc("POST /admin/reset", apicfg.HandlerResetUsers)
 	mux.HandleFunc("POST /api/userlogin", apicfg.HandlerUserLogin)
+	mux.HandleFunc("POST /api/refresh", apicfg.HandlerRefreshToken)
+	mux.HandleFunc("POST /api/revoke", apicfg.HandlerRevokeRefreshToken)
 
 	// start server
 	err = cardinalServer.ListenAndServe()

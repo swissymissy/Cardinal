@@ -46,12 +46,38 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// create new access token for user
+	accessToken, err := auth.MakeJWT(userInfo.ID, apicfg.JWTSecret)
+	if err != nil {
+		fmt.Printf("Error making new access token: %s", err)
+		ResponseWithError(w, 500, "Something went wrong! Try again")
+		return
+	}
+	// create a new refresh token for user
+	refreshToken, err := auth.MakeRefreshToken()
+	if err != nil {
+		fmt.Printf("Error making new refresh token: %s\n", err)
+		respondWithError(w, 400, "Something went wrong")
+		return
+	}
+	// store refresh token in database
+	_, err = apicfg.DB.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+		Token:	refreshToken,
+		UserID: userInfo.ID,
+	})
+	if err != nil {
+		fmt.Printf("Error storing refresh token in db: %s", err)
+		ResponseWithError(w, 500, "Something went wrong. Try again")
+		return
+	}
+	
 	fmt.Printf("User %s has logged in", email)
-	ResponseWithJSON(w, 200, User{
+	ResponseWithJSON(w, 200, LoginUser{
 		ID: userInfo.ID,
 		CreatedAt: userInfo.CreatedAt,
 		UpdatedAt: userInfo.UpdatedAt,
 		Email: userInfo.Email,
+		AccessToken: accessToken,
 	})
 
 } 

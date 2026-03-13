@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/swissymissy/Cardinal/internal/database"
+	"github.com/swissymissy/Cardinal/internal/auth"
 )
 
 
@@ -20,6 +21,21 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	// check user's token 
+	accessToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		fmt.Printf("Error getting token from header: %s", err)
+		ResponseWithError(w, 401, "Invalid Token")
+		return
+	}
+	// validate token
+	userID, err := auth.ValidateJWT(accessToken, apicfg.JWTSecret)
+	if err != nil {
+		fmt.Printf("Invalid token: %s", err)
+		ResponseWithError(w, 401, "Invalid Token")
+		return
+	}
+	
 	chirpBody := newChirp.Body
 	author := newChirp.UserID
 
@@ -40,7 +56,7 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 		ResponseWithError(w, 500, msg)
 		return 
 	}
-	ResponseWithJSON(w, 200, CreatedChirp{
+	ResponseWithJSON(w, 201, CreatedChirp{
 		ID: createdChirp.ID,
 		CreatedAt: createdChirp.CreatedAt,
 		UpdatedAt: createdChirp.UpdatedAt,

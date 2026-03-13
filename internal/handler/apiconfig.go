@@ -9,4 +9,5 @@ type ApiConfig struct {
 	DB 				*database.Queries
 	Port			string
 	Platform 		string
+	JWTSecret		string
 }
