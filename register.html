@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Register</h2>
+
+  <input id="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Password" />
+  <button onclick="register()">Create Account</button>
+
+  <script src="js/api.js"></script>
+  <script>
+    async function register() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const res = await apiRequest("/api/newuser", "POST", {
+        email,
+        password,
+      });
+
+      alert("User created!");
+      window.location.href = "/login.html";
+    }
+  </script>
+</body>
+</html>

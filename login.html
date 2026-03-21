@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Login</h2>
+
+  <input id="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const res = await apiRequest("/api/userlogin", "POST", {
+        email,
+        password,
+      });
+
+      saveTokens(res.access_token, res.refresh_token);
+
+      window.location.href = "/dashboard.html";
+    }
+  </script>
+</body>
+</html>
