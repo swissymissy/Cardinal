@@ -60,6 +60,7 @@ func main() {
 	mux.HandleFunc("POST /api/revoke", apicfg.HandlerRevokeRefreshToken)
 	mux.HandleFunc("POST /api/newchirp", apicfg.HandlerCreateChirp)
 	mux.HandleFunc("GET /api/getallchirps", apicfg.HandlerGetAllChirps)
+	mux.HandleFunc("DELETE /api/chirps/{chirpsID}", apicfg.HandlerDeleteChirp)
 
 	// start server
 	err = cardinalServer.ListenAndServe()
