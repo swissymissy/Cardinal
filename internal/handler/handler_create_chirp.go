@@ -15,7 +15,7 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 	var newChirp Chirp 
 	err := DecodeRequest(r, &newChirp)
 	if err != nil {
-		fmt.Printf("Error decoding request: %s", err)
+		fmt.Printf("Error decoding request: %s\n", err)
 		msg := "Something went wrong"
 		ResponseWithError(w, 500, msg )
 		return
@@ -24,14 +24,14 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 	// check user's token 
 	accessToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
-		fmt.Printf("Error getting token from header: %s", err)
+		fmt.Printf("Error getting token from header: %s\n", err)
 		ResponseWithError(w, 401, "Invalid Token")
 		return
 	}
 	// validate token
 	userID, err := auth.ValidateJWT(accessToken, apicfg.JWTSecret)
 	if err != nil {
-		fmt.Printf("Invalid token: %s", err)
+		fmt.Printf("Invalid token: %s\n", err)
 		ResponseWithError(w, 401, "Invalid Token")
 		return
 	}
@@ -41,7 +41,7 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 
 	err = CheckChirp(&newChirp) 
 	if err != nil {
-		fmt.Printf("%s", err)
+		fmt.Printf("%s\n", err)
 		ResponseWithError(w, 400, "Chirp is too long")
 		return
 	}
