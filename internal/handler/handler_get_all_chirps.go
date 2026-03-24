@@ -26,7 +26,7 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 		// author id is not given
 		chirpList, err = apicfg.DB.GetAllChirps( r.Context())
 		if err != nil {
-			fmt.Printf("Error getting all chirps : %s", err)
+			fmt.Printf("Error getting all chirps : %s\n", err)
 			ResponseWithError(w, http.StatusInternalServerError, "Can't get chirps. Try again")
 			return
 		}

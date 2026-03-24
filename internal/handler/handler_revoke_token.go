@@ -20,7 +20,7 @@ func (apicfg *ApiConfig) HandlerRevokeRefreshToken(w http.ResponseWriter, r *htt
 	// look for user with the given token in db
 	user, err := apicfg.DB.GetUserFromRefreshToken(r.Context(), refreshToken)
 	if err != nil {
-		fmt.Printf("Can't find user: %s", err)
+		fmt.Printf("Can't find user: %s\n", err)
 		ResponseWithError(w, 401, "Invalid Token")
 		return
 	}
@@ -29,7 +29,7 @@ func (apicfg *ApiConfig) HandlerRevokeRefreshToken(w http.ResponseWriter, r *htt
 	refreshTokenDB := user.Token
 	err = apicfg.DB.RevokedToken(r.Context(), refreshTokenDB)
 	if err != nil {
-		fmt.Printf("Error revoking refresh token: %s", err)
+		fmt.Printf("Error revoking refresh token: %s\n", err)
 		ResponseWithError(w, 500, "Something went wrong")
 		return
 	}

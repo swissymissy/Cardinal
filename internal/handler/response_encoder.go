@@ -14,7 +14,7 @@ func ResponseWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	// encode to json bytes
 	data, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Printf("Error encoding payload to json: %s", err)
+		fmt.Printf("Error encoding payload to json: %s\n", err)
 		return
 	}
 	w.Write(data)
@@ -31,7 +31,7 @@ func ResponseWithError( w http.ResponseWriter, code int, msg string) {
 	}
 	data, err := json.Marshal(response)
 	if err != nil {
-		fmt.Printf("Error encoding msg to json: %s", err)
+		fmt.Printf("Error encoding msg to json: %s\n", err)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

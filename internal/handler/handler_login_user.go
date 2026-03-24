@@ -67,12 +67,12 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 		UserID: userInfo.ID,
 	})
 	if err != nil {
-		fmt.Printf("Error storing refresh token in db: %s", err)
+		fmt.Printf("Error storing refresh token in db: %s\n", err)
 		ResponseWithError(w, 500, "Something went wrong. Try again")
 		return
 	}
 	
-	fmt.Printf("User %s has logged in", email)
+	fmt.Printf("User %s has logged in\n", email)
 	ResponseWithJSON(w, 200, LoginUser{
 		ID: userInfo.ID,
 		CreatedAt: userInfo.CreatedAt,
