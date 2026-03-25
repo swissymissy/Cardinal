@@ -62,6 +62,7 @@ func main() {
 	mux.HandleFunc("GET /api/getallchirps", apicfg.HandlerGetAllChirps)
 	mux.HandleFunc("DELETE /api/chirps/{chirpsID}", apicfg.HandlerDeleteChirp)
 	mux.HandleFunc("GET /api/chirps/{chirpsID}", apicfg.HandlerGetOneChirp)
+	mux.HandleFunc("POST /api/newfollow", apicfg.HandlerFollowUser)
 	// start server
 	err = cardinalServer.ListenAndServe()
 	if err != nil {

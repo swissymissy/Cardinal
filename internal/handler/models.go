@@ -39,7 +39,16 @@ type CreatedChirp struct {
 	UserID		uuid.UUID		`json:"user_id"`
 }
 
-
 type ResponseAccessToken struct {
 	Token 	string 	`json:"token"`
+}
+
+type NewFollow struct {
+	FolloweeID	uuid.UUID 	`json:"followee_id"`
+}
+type Follower struct {
+	FollowerID uuid.UUID	`json:"follower_id"`
+	FolloweeID uuid.UUID	`json:"followee_id"`
+	CreatedAt  time.Time	`json:"created_at"`
+	UpdatedAt  time.Time	`json:"updated_at"`
 }
