@@ -19,6 +19,13 @@ type Chirp struct {
 	UserID    uuid.UUID
 }
 
+type Follower struct {
+	FollowerID uuid.UUID
+	FolloweeID uuid.UUID
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
 type RefreshToken struct {
 	Token     string
 	CreatedAt time.Time
