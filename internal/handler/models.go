@@ -27,6 +27,13 @@ type LoginUser struct {
 	RefreshToken string		`json:"refresh_token"`
 }
 
+type UserProfile struct {
+	ID			uuid.UUID	`json:"id"`
+	CreatedAt	time.Time	`json:"created_at"`
+	FollowerCount int64		`json:"followers_count"`
+	FollowingCount int64	`json:"followings_count"`
+}
+
 type Chirp struct {
 	Body	string		`json:"body"`
 }
@@ -46,9 +53,15 @@ type ResponseAccessToken struct {
 type NewFollow struct {
 	FolloweeID	uuid.UUID 	`json:"followee_id"`
 }
+
 type Follower struct {
 	FollowerID uuid.UUID	`json:"follower_id"`
 	FolloweeID uuid.UUID	`json:"followee_id"`
 	CreatedAt  time.Time	`json:"created_at"`
 	UpdatedAt  time.Time	`json:"updated_at"`
+}
+
+type FollowList struct {
+	UserID 		uuid.UUID	`json:"user_id"`
+	CreatedAt	time.Time	`json:"followed_at"`
 }
