@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/swissymissy/Cardinal/internal/handler"
 	"github.com/swissymissy/Cardinal/internal/database"
+	"github.com/swissymissy/Cardinal/internal/pubsub"
 )
 
 
@@ -30,12 +31,23 @@ func main() {
 	}
 	dbQuery := database.New(db)
 
+	// connect to rabbitmq
+	rabbitConnectionStr := "amqp://guest:guest@localhost:5672/"
+	conn, ch, err := pubsub.Connect(rabbitConnectionStr)
+	if err != nil {
+		fmt.Printf("Failed to establish connection to Rabbit server: %s\n", err)
+		return 
+	}
+	defer conn.Close()
+	defer ch.Close()
+
 	// create apiConfig
 	apicfg := &handler.ApiConfig{
 		DB: dbQuery,
 		Port: port,
 		Platform: platform,
 		JWTSecret: jwtSecret,
+		MQConn: conn,
 	}
 
 	// server mux
