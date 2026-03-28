@@ -1,5 +1,10 @@
 package pubsub 
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 type QueueConfig struct {
 	Name string
 	Durable bool
@@ -27,3 +32,11 @@ type ChirpEvent struct {
 	ChirpID		uuid.UUID	`json:"chirp_id"`
 	CreatedAt	time.Time	`json:"created_at"`
 }
+
+type AckType int 
+const (
+	Ack AckType = iota
+	NackRequeue
+	NackDiscard
+)
+
