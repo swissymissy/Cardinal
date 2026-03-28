@@ -26,6 +26,16 @@ type Follower struct {
 	UpdatedAt  time.Time
 }
 
+type Notification struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	Body      string
+	Receiver  uuid.UUID
+	Triggerer uuid.UUID
+	ChirpID   uuid.UUID
+	IsRead    bool
+}
+
 type RefreshToken struct {
 	Token     string
 	CreatedAt time.Time

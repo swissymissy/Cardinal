@@ -21,3 +21,9 @@ const (
 	ExchangeTopic ExchangeType = "topic"
 )
 
+type ChirpEvent struct {
+	Body 		string 		`json:"body"`
+	Triggerer	uuid.UUID	`json:"triggerer"`
+	ChirpID		uuid.UUID	`json:"chirp_id"`
+	CreatedAt	time.Time	`json:"created_at"`
+}
