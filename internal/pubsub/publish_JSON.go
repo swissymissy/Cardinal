@@ -8,6 +8,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+// publish to exchange
 func PublishJSON[T any] (ctx context.Context, ch *amqp.Channel, exchange, key string, val T) error {
 	// convert val to json byte
 	bytes, err := json.Marshal(val)
