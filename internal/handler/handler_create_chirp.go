@@ -6,6 +6,7 @@ import (
 
 	"github.com/swissymissy/Cardinal/internal/database"
 	"github.com/swissymissy/Cardinal/internal/auth"
+	"github.com/swissymissy/Cardinal/internal/pubsub"
 )
 
 
@@ -61,7 +62,28 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 		CreatedAt: createdChirp.CreatedAt,
 		UpdatedAt: createdChirp.UpdatedAt,
 		Body: createdChirp.Body,
-		UserID: createdChirp. UserID,
+		UserID: createdChirp.UserID,
 	})
 
+	// publish notification to rabbit
+	// open channel from connection
+	ch, err := apicfg.MQConn.Channel()
+	if err != nil {
+		fmt.Printf("Failed to open MQ channel: %s\n", err)
+		return
+	}
+	defer ch.Close()
+
+	// publish to exchange, using fanout exchange type
+	err = pubsub.PublishJSON(r.Context(), ch, "notifications", "", pubsub.ChirpEvent{
+		Body 		: createdChirp.Body,
+		Triggerer	: createdChirp.UserID,
+		ChirpID		: createdChirp.ID,
+		CreatedAt	: createdChirp.CreatedAt,
+	})
+	if err != nil {
+		fmt.Printf("Failed to publish notification to exchange: %s\n", err)
+		return
+	}
+	fmt.Printf("Notification is published for new chirp: %s\n", createdChirp.ID)
 }
