@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 // create new access token for user
@@ -13,10 +13,10 @@ func MakeJWT(userID uuid.UUID, serverSecretToken string) (string, error) {
 
 	//create a new registered claim
 	claim := jwt.RegisteredClaims{
-		Issuer: "Cardinal-access",
-		IssuedAt: jwt.NewNumericDate(time.Now().UTC()),
+		Issuer:    "Cardinal-access",
+		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-		Subject: userID.String(),
+		Subject:   userID.String(),
 	}
 	//create new token
 	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
@@ -46,7 +46,7 @@ func ValidateJWT(tokenString, serverSecretToken string) (uuid.UUID, error) {
 	}
 
 	// retrieve userID from claim's Subject field
-	userIDStr := claim.Subject 
+	userIDStr := claim.Subject
 	// convert userID to uuid type
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {

@@ -1,24 +1,24 @@
 package pubsub
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 // helper
-func helperSubscribe[T any] (
+func helperSubscribe[T any](
 	conn *amqp.Connection,
-	exchangeName, 
+	exchangeName,
 	queueName,
 	key string,
 	queueType QueueType,
 	exchangeType ExchangeType,
 	handler func(T) AckType,
-	decoder func([]byte) (T, error)
+	decoder func([]byte) (T, error),
 ) error {
-	// make sure queue - exchange bound 
-	ch, queue, err := DeclareAndBind(conn, exchangeName, queueName, key, exchangeType, queueType )
+	// make sure queue - exchange bound
+	ch, queue, err := DeclareAndBind(conn, exchangeName, queueName, key, exchangeType, queueType)
 	if err != nil {
 		return fmt.Errorf("Queue does not exist or not bound to exchange: %w", err)
 	}
@@ -30,7 +30,7 @@ func helperSubscribe[T any] (
 
 	// start consuming
 	deliveryChan, err := ch.Consume(
-		queue.Name, 
+		queue.Name,
 		"",
 		false,
 		false,
@@ -45,7 +45,7 @@ func helperSubscribe[T any] (
 	// process msg in background
 	go func() {
 		defer ch.Close()
-		for msg := range deliveryChan{
+		for msg := range deliveryChan {
 			// decode msg
 			data, decodeErr := decoder(msg.Body)
 			if decodeErr != nil {
@@ -68,14 +68,14 @@ func helperSubscribe[T any] (
 				msg.Nack(false, false)
 			}
 		}
-	} ()
-	return nil 
+	}()
+	return nil
 }
 
 // Subscribe wapper
-func SubscribeJSON[T any] (
+func SubscribeJSON[T any](
 	conn *amqp.Connection,
-	exchangeName, 
+	exchangeName,
 	queueName,
 	key string,
 	queueType QueueType,

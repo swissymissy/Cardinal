@@ -1,18 +1,17 @@
-package auth 
+package auth
 
 import (
+	"github.com/google/uuid"
+	"net/http"
 	"testing"
 	"time"
-	"net/http"
-	"github.com/google/uuid"
 )
 
-
-func TestMakeJWTAndValidateJWT (t *testing.T) {
+func TestMakeJWTAndValidateJWT(t *testing.T) {
 	// create test object
 	secret := "test-object-secret"
 	userID := uuid.New()
-	expiresIn := time.Hour 			
+	expiresIn := time.Hour
 
 	// test function
 	token, err := MakeJWT(userID, secret, expiresIn)
@@ -28,18 +27,18 @@ func TestMakeJWTAndValidateJWT (t *testing.T) {
 
 	// asset
 	if returnredID != userID {
-		t.Errorf("expected %v, got %v", userID, returnredID) 
+		t.Errorf("expected %v, got %v", userID, returnredID)
 	}
 }
 
-func TestJWTEdgeCase (t *testing.T) {
+func TestJWTEdgeCase(t *testing.T) {
 	// create test object with expired duration
 	secret := "test-object-secret"
 	userID := uuid.New()
-	expiresIn := -1 * time.Hour			// expired an hour ago already
+	expiresIn := -1 * time.Hour // expired an hour ago already
 
 	// test Make function
-	token, err := MakeJWT( userID, secret, expiresIn)
+	token, err := MakeJWT(userID, secret, expiresIn)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -52,30 +51,30 @@ func TestJWTEdgeCase (t *testing.T) {
 }
 
 func TestGetBearerToken(t *testing.T) {
-	tests := []struct{
-		name 		string
-		headerValue	string 
-		expectToken string 
+	tests := []struct {
+		name        string
+		headerValue string
+		expectToken string
 		expectError bool
 	}{
 		{
-			name:		 "valid token",
+			name:        "valid token",
 			headerValue: "Bearer abc123",
 			expectToken: "abc123",
 			expectError: false,
 		},
 		{
-			name:		 "missing header",
+			name:        "missing header",
 			headerValue: "",
 			expectError: true,
 		},
 		{
-			name:		 "wrong prefix",
+			name:        "wrong prefix",
 			headerValue: "Token abc123",
 			expectError: true,
 		},
 		{
-			name:		 "empty token",
+			name:        "empty token",
 			headerValue: "Bearer ",
 			expectError: true,
 		},

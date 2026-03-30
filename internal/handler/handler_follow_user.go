@@ -1,16 +1,16 @@
 package handler
 
 import (
-	"net/http"
-	"fmt"
 	"database/sql"
 	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
 )
 
-func (apicfg *ApiConfig) HandlerFollowUser (w http.ResponseWriter, r *http.Request) {
+func (apicfg *ApiConfig) HandlerFollowUser(w http.ResponseWriter, r *http.Request) {
 	// get user token
 	accessToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
@@ -31,7 +31,7 @@ func (apicfg *ApiConfig) HandlerFollowUser (w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		fmt.Printf("Error decoding request: %s\n", err)
 		msg := "Something went wrong"
-		ResponseWithError(w, 500, msg )
+		ResponseWithError(w, 500, msg)
 		return
 	}
 	followerID := userID
@@ -50,12 +50,11 @@ func (apicfg *ApiConfig) HandlerFollowUser (w http.ResponseWriter, r *http.Reque
 		ResponseWithError(w, 500, "Failed to follow. Try again.")
 		return
 	}
-	
+
 	ResponseWithJSON(w, 201, Follower{
 		FollowerID: newFollowing.FollowerID,
 		FolloweeID: newFollowing.FolloweeID,
-		CreatedAt: newFollowing.CreatedAt,
-		UpdatedAt: newFollowing.UpdatedAt,
+		CreatedAt:  newFollowing.CreatedAt,
+		UpdatedAt:  newFollowing.UpdatedAt,
 	})
 }
-

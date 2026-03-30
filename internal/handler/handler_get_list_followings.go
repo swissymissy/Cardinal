@@ -1,15 +1,15 @@
 package handler
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
 )
 
-func (apicfg *ApiConfig) HandlerGetFollowings (w http.ResponseWriter, r *http.Request) {
+func (apicfg *ApiConfig) HandlerGetFollowings(w http.ResponseWriter, r *http.Request) {
 	// get user token
 	accessToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
@@ -42,9 +42,9 @@ func (apicfg *ApiConfig) HandlerGetFollowings (w http.ResponseWriter, r *http.Re
 	}
 	// put each following into format response
 	list := []FollowList{}
-	for _, followee := range followingList{
+	for _, followee := range followingList {
 		list = append(list, FollowList{
-			UserID: followee.FolloweeID,
+			UserID:    followee.FolloweeID,
 			CreatedAt: followee.CreatedAt,
 		})
 	}

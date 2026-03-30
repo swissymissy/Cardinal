@@ -1,10 +1,10 @@
-package handler 
+package handler
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
-	"errors"
-	"database/sql"
 
 	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
@@ -16,7 +16,7 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 	err := DecodeRequest(r, &user)
 	if err != nil {
 		fmt.Printf("Error decoding request: %s", err)
-		ResponseWithError(w, 500 , "Something went wrong. Try again")
+		ResponseWithError(w, 500, "Something went wrong. Try again")
 		return
 	}
 
@@ -27,7 +27,7 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 	userInfo, err := apicfg.DB.GetUserByEmail(r.Context(), email)
 	if errors.Is(err, sql.ErrNoRows) {
 		fmt.Printf("Can't find user in db: %s", err)
-		ResponseWithError(w, 401, "Incorrect Email or Password" )
+		ResponseWithError(w, 401, "Incorrect Email or Password")
 		return
 	} else if err != nil {
 		fmt.Printf("Error getting user from db: %s", err)
@@ -43,7 +43,7 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 		return
 	}
 	if !match {
-		ResponseWithError(w, 401 , "Incorrect Email or Password")
+		ResponseWithError(w, 401, "Incorrect Email or Password")
 		return
 	}
 
@@ -63,7 +63,7 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 	}
 	// store refresh token in database
 	_, err = apicfg.DB.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
-		Token:	refreshToken,
+		Token:  refreshToken,
 		UserID: userInfo.ID,
 	})
 	if err != nil {
@@ -71,15 +71,15 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 		ResponseWithError(w, 500, "Something went wrong. Try again")
 		return
 	}
-	
+
 	fmt.Printf("User %s has logged in\n", email)
 	ResponseWithJSON(w, 200, LoginUser{
-		ID: userInfo.ID,
-		CreatedAt: userInfo.CreatedAt,
-		UpdatedAt: userInfo.UpdatedAt,
-		Email: userInfo.Email,
-		AccessToken: accessToken,
+		ID:           userInfo.ID,
+		CreatedAt:    userInfo.CreatedAt,
+		UpdatedAt:    userInfo.UpdatedAt,
+		Email:        userInfo.Email,
+		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
 
-} 
+}

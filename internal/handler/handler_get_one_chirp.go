@@ -1,15 +1,15 @@
-package handler 
+package handler
 
 import (
-	"net/http"
-	"fmt"
-	"errors"
 	"database/sql"
+	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/google/uuid"
 )
 
-func (apicfg *ApiConfig) HandlerGetOneChirp( w http.ResponseWriter, r *http.Request) {
+func (apicfg *ApiConfig) HandlerGetOneChirp(w http.ResponseWriter, r *http.Request) {
 	// get chirp ID
 	chirpIDStr := r.PathValue("chirpsID")
 	chirpID, err := uuid.Parse(chirpIDStr)
@@ -30,10 +30,10 @@ func (apicfg *ApiConfig) HandlerGetOneChirp( w http.ResponseWriter, r *http.Requ
 	}
 
 	ResponseWithJSON(w, 200, CreatedChirp{
-		ID: chirpInfo.ID,
+		ID:        chirpInfo.ID,
 		CreatedAt: chirpInfo.CreatedAt,
 		UpdatedAt: chirpInfo.UpdatedAt,
-		Body: chirpInfo.Body,
-		UserID: chirpInfo.UserID,
+		Body:      chirpInfo.Body,
+		UserID:    chirpInfo.UserID,
 	})
 }

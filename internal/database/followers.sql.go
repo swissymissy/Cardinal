@@ -96,6 +96,42 @@ func (q *Queries) GetFollowers(ctx context.Context, followeeID uuid.UUID) ([]Get
 	return items, nil
 }
 
+const getFollowersEmail = `-- name: GetFollowersEmail :many
+SELECT u.id , u.email
+FROM followers f
+JOIN users u ON u.id = f.follower_id 
+WHERE f.followee_id = $1
+ORDER BY f.created_at DESC
+`
+
+type GetFollowersEmailRow struct {
+	ID    uuid.UUID
+	Email string
+}
+
+func (q *Queries) GetFollowersEmail(ctx context.Context, followeeID uuid.UUID) ([]GetFollowersEmailRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowersEmail, followeeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFollowersEmailRow
+	for rows.Next() {
+		var i GetFollowersEmailRow
+		if err := rows.Scan(&i.ID, &i.Email); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getFollowings = `-- name: GetFollowings :many
 SELECT followee_id, created_at FROM followers 
 WHERE follower_id = $1 

@@ -10,8 +10,8 @@ import (
 
 // handle create new user
 func (apicfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) {
-	
-	// decode the request 
+
+	// decode the request
 	var newUser NewUser
 	err := DecodeRequest(r, &newUser)
 	if err != nil {
@@ -32,21 +32,21 @@ func (apicfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Reques
 
 	// save user to database
 	user, err := apicfg.DB.CreateUser(r.Context(), database.CreateUserParams{
-		Email: userEmail,
+		Email:          userEmail,
 		HashedPassword: hashed,
 	})
 	if err != nil {
 		fmt.Printf("Error inserting new user: %s\n", err)
-		ResponseWithError(w, 500 , "Can't create new user! Try again")
+		ResponseWithError(w, 500, "Can't create new user! Try again")
 		return
 	}
 
 	// response back to client
 	ResponseWithJSON(w, 201, User{
-		ID: user.ID,
+		ID:        user.ID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
-		Email: user.Email,
+		Email:     user.Email,
 	})
 	return
 

@@ -1,9 +1,9 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 	"strings"
-	"errors"
 )
 
 // get token from authorization header

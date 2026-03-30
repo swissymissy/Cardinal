@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"	
 )
 
 // successful response with json
@@ -21,9 +21,9 @@ func ResponseWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 // write response with error message
-func ResponseWithError( w http.ResponseWriter, code int, msg string) {
+func ResponseWithError(w http.ResponseWriter, code int, msg string) {
 	type errorMsg struct {
-		Error string  `json:"error"`
+		Error string `json:"error"`
 	}
 
 	response := errorMsg{

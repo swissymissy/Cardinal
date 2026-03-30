@@ -1,4 +1,4 @@
-package handler 
+package handler
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ func (apicfg *ApiConfig) HandlerResetUsers(w http.ResponseWriter, r *http.Reques
 	err := apicfg.DB.ResetUsers(r.Context())
 	if err != nil {
 		fmt.Printf("Error resetting users table: %s", err)
-		ResponseWithError(w, 500 , "Can't reset table. Something went wrong")
+		ResponseWithError(w, 500, "Can't reset table. Something went wrong")
 		return
 	}
 	w.WriteHeader(200)
