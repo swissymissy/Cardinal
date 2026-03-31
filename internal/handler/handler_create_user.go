@@ -39,7 +39,7 @@ func (apicfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Reques
 	})
 	if err != nil {
 		fmt.Printf("Error inserting new user: %s\n", err)
-		ResponseWithError(w, 500, "Can't create new user! Try again")
+		ResponseWithError(w, 400, "Can't create new user! Email or Username already taken.")
 		return
 	}
 
