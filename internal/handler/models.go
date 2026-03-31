@@ -31,6 +31,7 @@ type LoginUser struct {
 
 type UserProfile struct {
 	ID             uuid.UUID `json:"id"`
+	Username 	   string 	 `json:"username"`
 	CreatedAt      time.Time `json:"created_at"`
 	FollowerCount  int64     `json:"followers_count"`
 	FollowingCount int64     `json:"followings_count"`
@@ -66,5 +67,6 @@ type Follower struct {
 
 type FollowList struct {
 	UserID    uuid.UUID `json:"user_id"`
+	Username  string 	`json:"username"`
 	CreatedAt time.Time `json:"followed_at"`
 }

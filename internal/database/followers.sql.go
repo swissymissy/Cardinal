@@ -63,14 +63,17 @@ func (q *Queries) GetCountFollowings(ctx context.Context, followerID uuid.UUID) 
 }
 
 const getFollowers = `-- name: GetFollowers :many
-SELECT follower_id, created_at FROM followers
-WHERE followee_id = $1
-ORDER BY created_at DESC
+SELECT f.follower_id, f.created_at, u.username 
+FROM followers f
+JOIN users u ON u.id = f.followers_id
+WHERE f.followee_id = $1
+ORDER BY f.created_at DESC
 `
 
 type GetFollowersRow struct {
 	FollowerID uuid.UUID
 	CreatedAt  time.Time
+	Username   string
 }
 
 func (q *Queries) GetFollowers(ctx context.Context, followeeID uuid.UUID) ([]GetFollowersRow, error) {
@@ -82,7 +85,7 @@ func (q *Queries) GetFollowers(ctx context.Context, followeeID uuid.UUID) ([]Get
 	var items []GetFollowersRow
 	for rows.Next() {
 		var i GetFollowersRow
-		if err := rows.Scan(&i.FollowerID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(&i.FollowerID, &i.CreatedAt, &i.Username); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -133,14 +136,17 @@ func (q *Queries) GetFollowersEmail(ctx context.Context, followeeID uuid.UUID) (
 }
 
 const getFollowings = `-- name: GetFollowings :many
-SELECT followee_id, created_at FROM followers 
-WHERE follower_id = $1 
-ORDER BY created_at DESC
+SELECT f.followee_id, f.created_at, u.username
+FROM followers f
+JOIN users u ON u.id = f.followee_id 
+WHERE f.follower_id = $1 
+ORDER BY f.created_at DESC
 `
 
 type GetFollowingsRow struct {
 	FolloweeID uuid.UUID
 	CreatedAt  time.Time
+	Username   string
 }
 
 func (q *Queries) GetFollowings(ctx context.Context, followerID uuid.UUID) ([]GetFollowingsRow, error) {
@@ -152,7 +158,7 @@ func (q *Queries) GetFollowings(ctx context.Context, followerID uuid.UUID) ([]Ge
 	var items []GetFollowingsRow
 	for rows.Next() {
 		var i GetFollowingsRow
-		if err := rows.Scan(&i.FolloweeID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(&i.FolloweeID, &i.CreatedAt, &i.Username); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

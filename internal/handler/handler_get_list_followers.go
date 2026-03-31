@@ -45,6 +45,7 @@ func (apicfg *ApiConfig) HandlerGetFollowers(w http.ResponseWriter, r *http.Requ
 	for _, follower := range followerList {
 		list = append(list, FollowList{
 			UserID:    follower.FollowerID,
+			Username:  follower.Username,
 			CreatedAt: follower.CreatedAt,
 		})
 	}
