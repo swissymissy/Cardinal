@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"
+	"github.com/swissymissy/Cardinal/internal/database"
 )
 
 func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) {
@@ -26,25 +27,38 @@ func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) 
 		ResponseWithError(w, 401, "Invalid Token")
 		return
 	}
-	// get user's ID
-	targetIDStr := r.PathValue("userID")
-	targetID, err := uuid.Parse(targetIDStr)
-	if err != nil {
-		fmt.Printf("Invalid user ID: %s\n", err)
-		ResponseWithError(w, 400, "Invalid user ID")
-		return
-	}
-	// retrieve user's information by userID
-	targetInfo, err := apicfg.DB.GetUserByID(r.Context(), targetID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			ResponseWithError(w, 404, "User not found")
+
+	// get user's identifier
+	target := r.PathValue("identifier")
+	var targetID uuid.UUID
+	var targetInfo database.User 
+
+	if id, err := uuid.Parse(target); err == nil {
+		targetID = id
+		targetInfo, err = apicfg.DB.GetUserByID(r.Context(), targetID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				ResponseWithError(w, 404, "User not found")
+				return
+			}
+			fmt.Printf("Error fetching user: %s\n", err)
+			ResponseWithError(w, 500, "Can't find user. Try again.")
 			return
 		}
-		fmt.Printf("Error fetching user: %s\n", err)
-		ResponseWithError(w, 500, "Something went wrong. Try again.")
-		return
+	} else {
+		targetInfo, err = apicfg.DB.GetUserByUsername(r.Context(), target)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				ResponseWithError(w, 404, "User not found")
+				return
+			}
+			fmt.Printf("Error fetching user: %s\n", err)
+			ResponseWithError(w, 500, "Can't find user. Try again")
+			return
+		}
+		targetID = targetInfo.ID
 	}
+	
 	// retrieve user's number of followers
 	numFollowers, err := apicfg.DB.GetCountFollowers(r.Context(), targetID)
 	if err != nil {
