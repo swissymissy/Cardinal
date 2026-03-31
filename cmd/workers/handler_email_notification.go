@@ -57,7 +57,7 @@ func (wkrcfg *WorkerConfig) sendChirpEmail(email string, event pubsub.ChirpEvent
 	if err := message.To(email); err != nil {
 		return fmt.Errorf("Failed to set To address: %w", err)
 	}
-	message.Subject("New chirp from someone you follow!")
+	message.Subject(fmt.Sprintf("New chirp from %s!", event.Username))
 	message.SetBodyString(mail.TypeTextPlain, fmt.Sprintf(
 		"Someone you follow posted a new chirp:\n\n%s", event.Body,
 	))

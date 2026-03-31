@@ -11,11 +11,13 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
+	Username  string 	`json:"username"`
 }
 
 type NewUser struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Username string	`json:"username"`
 }
 
 type LoginUser struct {
@@ -44,6 +46,7 @@ type CreatedChirp struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Body      string    `json:"body"`
 	UserID    uuid.UUID `json:"user_id"`
+	Username  string 	`json:"username"`
 }
 
 type ResponseAccessToken struct {
