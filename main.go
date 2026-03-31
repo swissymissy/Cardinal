@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"os"
 
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/swissymissy/Cardinal/internal/database"
 	"github.com/swissymissy/Cardinal/internal/handler"
-	"github.com/swissymissy/Cardinal/internal/pubsub"
 )
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 
 	// connect to rabbitmq
 	rabbitConnectionStr := "amqp://guest:guest@localhost:5672/"
-	conn, err := pubsub.Dial(rabbitConnectionStr)
+	conn, err := amqp.Dial(rabbitConnectionStr)
 	if err != nil {
 		fmt.Printf("Failed to establish connection to Rabbit server: %s\n", err)
 		return

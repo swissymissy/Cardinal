@@ -12,10 +12,12 @@ import (
 	"github.com/swissymissy/Cardinal/internal/pubsub"
 	"github.com/swissymissy/Cardinal/internal/database"
 	"github.com/joho/godotenv"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func main() {
-	
+	fmt.Println("Starting Workers listener...")
+
 	// get values from .env
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
@@ -37,7 +39,7 @@ func main() {
 	dbQuery := database.New(db)
 
 	// create worker config
-	wkrcfg := &WorkerConfig{
+	wkrcfg := WorkerConfig{
 		DB: dbQuery,
 		SMTPHost: smtpHost,
 		SMTPPort: smtpPort,
@@ -47,7 +49,7 @@ func main() {
 
 	// connect to rabbitmq
 	rabbitConnectionStr := "amqp://guest:guest@localhost:5672/"
-	conn, err := pubsub.Dial(rabbitConnectionStr)
+	conn, err := amqp.Dial(rabbitConnectionStr)
 	if err != nil {
 		fmt.Printf("Failed to establish connection to Rabbit server: %s\n", err)
 		return

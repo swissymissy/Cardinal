@@ -6,6 +6,7 @@ import (
 
 	"github.com/swissymissy/Cardinal/internal/pubsub"
 	"github.com/wneessen/go-mail"
+	"github.com/google/uuid"
 )
 
 // handler to send email notification to the followers' email
@@ -15,6 +16,10 @@ func (wkrcfg *WorkerConfig) HandlerEmailNotification(event pubsub.ChirpEvent) pu
 	if err != nil {
 		fmt.Printf("Failed to get follower emails: %s\n", err)
 		return pubsub.NackRequeue
+	}
+	if len(emails) == 0 {
+		fmt.Println("No follower to send email")
+		return pubsub.Ack 
 	}
 
 	for _, email := range emails {
