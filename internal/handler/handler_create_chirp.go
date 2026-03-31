@@ -56,12 +56,21 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 		ResponseWithError(w, 500, msg)
 		return
 	}
+	// get username 
+	user, err := apicfg.DB.GetUserByID(r.Context(), createdChirp.UserID)
+	if err != nil {
+		fmt.Printf("Error fetching user: %s\n", err)
+		ResponseWithError(w, 500, "Something went wrong. Try again.")
+		return
+	}
+
 	ResponseWithJSON(w, 201, CreatedChirp{
 		ID:        createdChirp.ID,
 		CreatedAt: createdChirp.CreatedAt,
 		UpdatedAt: createdChirp.UpdatedAt,
 		Body:      createdChirp.Body,
 		UserID:    createdChirp.UserID,
+		Username:  user.Username,
 	})
 
 	// publish notification to rabbit
@@ -77,6 +86,7 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 	err = pubsub.PublishJSON(r.Context(), ch, "notifications", "", pubsub.ChirpEvent{
 		Body:      createdChirp.Body,
 		Triggerer: createdChirp.UserID,
+		Username:  user.Username,
 		ChirpID:   createdChirp.ID,
 		CreatedAt: createdChirp.CreatedAt,
 	})

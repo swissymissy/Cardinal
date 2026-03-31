@@ -9,14 +9,18 @@ DELETE FROM followers
 WHERE follower_id = $1 AND followee_id = $2;
 
 -- name: GetFollowings :many
-SELECT followee_id, created_at FROM followers 
-WHERE follower_id = $1 
-ORDER BY created_at DESC;
+SELECT f.followee_id, f.created_at, u.username
+FROM followers f
+JOIN users u ON u.id = f.followee_id 
+WHERE f.follower_id = $1 
+ORDER BY f.created_at DESC;
 
 -- name: GetFollowers :many
-SELECT follower_id, created_at FROM followers
-WHERE followee_id = $1
-ORDER BY created_at DESC;
+SELECT f.follower_id, f.created_at, u.username 
+FROM followers f
+JOIN users u ON u.id = f.followers_id
+WHERE f.followee_id = $1
+ORDER BY f.created_at DESC;
 
 -- name: GetCountFollowings :one 
 SELECT COUNT(*) AS following_count
