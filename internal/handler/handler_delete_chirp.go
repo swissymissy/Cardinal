@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"net/http"
-	"fmt"
-	"errors"
 	"database/sql"
+	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"
@@ -26,8 +26,8 @@ func (apicfg *ApiConfig) HandlerDeleteChirp(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	chirpIDStr := r.PathValue("chirpsID")		// extract ID string from URL
-	chirpID, err := uuid.Parse(chirpIDStr)		// convert string to uuid
+	chirpIDStr := r.PathValue("chirpsID")  // extract ID string from URL
+	chirpID, err := uuid.Parse(chirpIDStr) // convert string to uuid
 	if err != nil {
 		ResponseWithError(w, http.StatusBadRequest, "Invalid ID")
 		return
@@ -38,20 +38,20 @@ func (apicfg *ApiConfig) HandlerDeleteChirp(w http.ResponseWriter, r *http.Reque
 		ResponseWithError(w, 404, "Chirp does not exist or already deleted")
 		return
 	} else if err != nil {
-		ResponseWithError(w, 500 , "Can't get chirp")
+		ResponseWithError(w, 500, "Can't get chirp")
 		return
 	}
 
 	// check if chirp belong to user
 	if userID != chirpInfo.UserID {
-		ResponseWithError(w, 403 , "Unauthorized")
+		ResponseWithError(w, 403, "Unauthorized")
 		return
 	}
 
 	// delete chirp
 	err = apicfg.DB.DeleteOneChirp(r.Context(), chirpID)
 	if err != nil {
-		ResponseWithError(w, 500 , "Unable to delete chirp")
+		ResponseWithError(w, 500, "Unable to delete chirp")
 		return
 	}
 	w.WriteHeader(204)

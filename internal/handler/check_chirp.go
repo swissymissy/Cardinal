@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// check for length and language in chirp 
+// check for length and language in chirp
 func CheckChirp(msg *Chirp) error {
 
 	// check length
@@ -23,15 +23,15 @@ func cleanChirp(msg string) string {
 
 	// bad words
 	bad := map[string]struct{}{
-		"fuck": {},
-		"asshole": {},
-		"dick": {},
+		"fuck":     {},
+		"asshole":  {},
+		"dick":     {},
 		"dickhead": {},
 		"shithead": {},
-		"bitch": {},
+		"bitch":    {},
 	}
 
-	for i := range split_msg{
+	for i := range split_msg {
 		word := strings.ToLower(split_msg[i])
 		if _, ok := bad[word]; ok {
 			split_msg[i] = "meowmeow"

@@ -1,8 +1,8 @@
-package handler 
+package handler
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 	"sort"
 
 	"github.com/google/uuid"
@@ -16,7 +16,7 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 	desc := false
 	if sortPara == "desc" {
 		desc = true
-	} 
+	}
 
 	// fetch data according to query parameter
 	var chirpList []database.Chirp
@@ -24,7 +24,7 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 
 	if authorID == "" {
 		// author id is not given
-		chirpList, err = apicfg.DB.GetAllChirps( r.Context())
+		chirpList, err = apicfg.DB.GetAllChirps(r.Context())
 		if err != nil {
 			fmt.Printf("Error getting all chirps : %s\n", err)
 			ResponseWithError(w, http.StatusInternalServerError, "Can't get chirps. Try again")
@@ -33,7 +33,7 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 	} else {
 		userID, err := uuid.Parse(authorID)
 		if err != nil {
-			ResponseWithError(w, http.StatusBadRequest , "Invalid ID")
+			ResponseWithError(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
@@ -43,23 +43,23 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 			return
 		}
 	}
-	
+
 	// desc order
 	if desc {
-		sort.Slice(chirpList, func(i ,j int) bool{
+		sort.Slice(chirpList, func(i, j int) bool {
 			return chirpList[i].CreatedAt.After(chirpList[j].CreatedAt)
 		})
 	}
 
 	// writing each chirp to response
 	var list []CreatedChirp
-	for _, chirp := range chirpList{
+	for _, chirp := range chirpList {
 		list = append(list, CreatedChirp{
-			ID: chirp.ID,
+			ID:        chirp.ID,
 			CreatedAt: chirp.CreatedAt,
 			UpdatedAt: chirp.UpdatedAt,
-			Body: chirp.Body,
-			UserID: chirp.UserID,
+			Body:      chirp.Body,
+			UserID:    chirp.UserID,
 		})
 	}
 	ResponseWithJSON(w, http.StatusOK, list)

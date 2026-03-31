@@ -27,3 +27,10 @@ WHERE follower_id = $1;
 SELECT COUNT(*) AS follower_count
 FROM followers 
 WHERE followee_id = $1;
+
+-- name: GetFollowersEmail :many
+SELECT u.id , u.email
+FROM followers f
+JOIN users u ON u.id = f.follower_id 
+WHERE f.followee_id = $1
+ORDER BY f.created_at DESC;

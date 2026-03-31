@@ -1,27 +1,26 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"net/http"
 	"database/sql"
+	"fmt"
+	"net/http"
+	"os"
 
-	_ "github.com/lib/pq"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/joho/godotenv"
-	"github.com/swissymissy/Cardinal/internal/handler"
+	_ "github.com/lib/pq"
 	"github.com/swissymissy/Cardinal/internal/database"
-	"github.com/swissymissy/Cardinal/internal/pubsub"
+	"github.com/swissymissy/Cardinal/internal/handler"
 )
-
 
 func main() {
 
-	// get values from .env 
-	godotenv.Load() 				
-	port := os.Getenv("PORT")					// load port 
-	platform := os.Getenv("PLATFORM")			// check if is dev
-	dbURL := os.Getenv("DB_URL")				// load db url
-	jwtSecret := os.Getenv("JWT_SECRET")		// load jwt secret
+	// get values from .env
+	godotenv.Load()
+	port := os.Getenv("PORT")            // load port
+	platform := os.Getenv("PLATFORM")    // check if is dev
+	dbURL := os.Getenv("DB_URL")         // load db url
+	jwtSecret := os.Getenv("JWT_SECRET") // load jwt secret
 
 	// open connection to database
 	db, err := sql.Open("postgres", dbURL)
@@ -33,21 +32,27 @@ func main() {
 
 	// connect to rabbitmq
 	rabbitConnectionStr := "amqp://guest:guest@localhost:5672/"
-	conn, ch, err := pubsub.Connect(rabbitConnectionStr)
+	conn, err := amqp.Dial(rabbitConnectionStr)
 	if err != nil {
 		fmt.Printf("Failed to establish connection to Rabbit server: %s\n", err)
-		return 
+		return
+	}
+	// create a channel from the connection
+	ch, err := conn.Channel()
+	if err != nil {
+		fmt.Printf("Can't create new channel: %s\n", err)
+		return
 	}
 	defer conn.Close()
 	defer ch.Close()
 
 	// create apiConfig
 	apicfg := &handler.ApiConfig{
-		DB: dbQuery,
-		Port: port,
-		Platform: platform,
+		DB:        dbQuery,
+		Port:      port,
+		Platform:  platform,
 		JWTSecret: jwtSecret,
-		MQConn: conn,
+		MQConn:    conn,
 	}
 
 	// server mux
@@ -55,7 +60,7 @@ func main() {
 	// server
 	address := fmt.Sprintf(":%s", port)
 	cardinalServer := http.Server{
-		Addr: address,
+		Addr:    address,
 		Handler: mux,
 	}
 	fmt.Printf("Serving on: http://localhost:%s\n", port)

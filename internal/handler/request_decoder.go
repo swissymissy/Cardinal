@@ -1,11 +1,10 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
 )
-
 
 func DecodeRequest[T any](r *http.Request, val *T) error {
 	defer r.Body.Close()

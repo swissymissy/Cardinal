@@ -13,30 +13,30 @@ func DeclareAndBind(
 	queueName,
 	key string,
 	exchangeType ExchangeType,
-	queueType QueueType
-)(*amqp.Channel, amqp.Queue, error) {
+	queueType QueueType,
+) (*amqp.Channel, amqp.Queue, error) {
 	// create new channel for queue and exchange
 	ch, err := connection.Channel()
 	if err != nil {
 		return nil, amqp.Queue{}, fmt.Errorf("Error create new channel: %w", err)
 	}
-	
+
 	// queue config
-	durable := false 
-	autoDel := false 
+	durable := false
+	autoDel := false
 	exclsv := false
 	if queueType == Durable {
 		durable = true
 	} else {
-		autoDel = true 
+		autoDel = true
 		exclsv = true
 	}
 	qcfg := QueueConfig{
-		Name: queueName,
-		Durable: durable,
+		Name:       queueName,
+		Durable:    durable,
 		AutoDelete: autoDel,
-		Exclusive: exclsv,
-		NoWait: false,
+		Exclusive:  exclsv,
+		NoWait:     false,
 	}
 
 	// declare exchange

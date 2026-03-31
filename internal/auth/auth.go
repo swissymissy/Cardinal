@@ -1,4 +1,4 @@
-package auth	
+package auth
 
 import (
 	"fmt"
@@ -7,17 +7,17 @@ import (
 )
 
 // hash password
-func HashPassword(password string ) (string, error) {
+func HashPassword(password string) (string, error) {
 	hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
 	if err != nil {
 		return "", fmt.Errorf("Error hashing password: %w", err)
 	}
-	return hash, nil 
+	return hash, nil
 }
 
-// check password and hash 
+// check password and hash
 func CheckPasswordHash(password, hash string) (bool, error) {
-	match,err := argon2id.ComparePasswordAndHash(password, hash)
+	match, err := argon2id.ComparePasswordAndHash(password, hash)
 	if err != nil {
 		return false, fmt.Errorf("Error matching password and hash: %w", err)
 	}

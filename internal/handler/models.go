@@ -7,61 +7,61 @@ import (
 )
 
 type User struct {
-	ID			uuid.UUID	`json:"id"`			
-	CreatedAt	time.Time	`json:"created_at"`
-	UpdatedAt	time.Time	`json:"updated_at"`
-	Email		string		`json:"email"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Email     string    `json:"email"`
 }
 
 type NewUser struct {
-	Email		string 		`json:"email"`
-	Password 	string      `json:"password"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type LoginUser struct {
-	ID 			uuid.UUID	`json:"id"`
-	CreatedAt	time.Time	`json:"created_at"`
-	UpdatedAt	time.Time	`json:"updated_at"`
-	Email		string		`json:"email"`
-	AccessToken string  	`json:"access_token"`
-	RefreshToken string		`json:"refresh_token"`
+	ID           uuid.UUID `json:"id"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	Email        string    `json:"email"`
+	AccessToken  string    `json:"access_token"`
+	RefreshToken string    `json:"refresh_token"`
 }
 
 type UserProfile struct {
-	ID			uuid.UUID	`json:"id"`
-	CreatedAt	time.Time	`json:"created_at"`
-	FollowerCount int64		`json:"followers_count"`
-	FollowingCount int64	`json:"followings_count"`
+	ID             uuid.UUID `json:"id"`
+	CreatedAt      time.Time `json:"created_at"`
+	FollowerCount  int64     `json:"followers_count"`
+	FollowingCount int64     `json:"followings_count"`
 }
 
 type Chirp struct {
-	Body	string		`json:"body"`
+	Body string `json:"body"`
 }
 
 type CreatedChirp struct {
-	ID			uuid.UUID		`json:"id"`
-	CreatedAt	time.Time		`json:"created_at"`
-	UpdatedAt	time.Time		`json:"updated_at"`
-	Body 		string			`json:"body"`
-	UserID		uuid.UUID		`json:"user_id"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Body      string    `json:"body"`
+	UserID    uuid.UUID `json:"user_id"`
 }
 
 type ResponseAccessToken struct {
-	Token 	string 	`json:"token"`
+	Token string `json:"token"`
 }
 
 type NewFollow struct {
-	FolloweeID	uuid.UUID 	`json:"followee_id"`
+	FolloweeID uuid.UUID `json:"followee_id"`
 }
 
 type Follower struct {
-	FollowerID uuid.UUID	`json:"follower_id"`
-	FolloweeID uuid.UUID	`json:"followee_id"`
-	CreatedAt  time.Time	`json:"created_at"`
-	UpdatedAt  time.Time	`json:"updated_at"`
+	FollowerID uuid.UUID `json:"follower_id"`
+	FolloweeID uuid.UUID `json:"followee_id"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type FollowList struct {
-	UserID 		uuid.UUID	`json:"user_id"`
-	CreatedAt	time.Time	`json:"followed_at"`
+	UserID    uuid.UUID `json:"user_id"`
+	CreatedAt time.Time `json:"followed_at"`
 }

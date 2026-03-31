@@ -1,24 +1,24 @@
 package handler
 
 import (
-	"net/http"
-	"fmt"
-	"errors"
 	"database/sql"
+	"errors"
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"
 )
 
-func (apicfg *ApiConfig) HandlerGetUser (w http.ResponseWriter, r *http.Request) {
+func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) {
 	// get user's token
 	accessToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		fmt.Printf("Error getting token from header: %s\n", err)
 		ResponseWithError(w, 401, "Invalid Token")
 		return
-	} 
+	}
 	// validate user's token
 	userID, err := auth.ValidateJWT(accessToken, apicfg.JWTSecret)
 	if err != nil {
@@ -26,7 +26,7 @@ func (apicfg *ApiConfig) HandlerGetUser (w http.ResponseWriter, r *http.Request)
 		ResponseWithError(w, 401, "Invalid Token")
 		return
 	}
-	// get user's ID 
+	// get user's ID
 	targetIDStr := r.PathValue("userID")
 	targetID, err := uuid.Parse(targetIDStr)
 	if err != nil {
@@ -61,26 +61,26 @@ func (apicfg *ApiConfig) HandlerGetUser (w http.ResponseWriter, r *http.Request)
 	}
 	// repsonse with information
 	if targetID == userID {
-		ResponseWithJSON(w, 200, struct{
-			ID			uuid.UUID	`json:"id"`
-			CreatedAt	time.Time	`json:"created_at"`
-			UpdatedAt	time.Time	`json:"updated_at"`
-			Email		string		`json:"email"`
-			FollowerCount int64		`json:"followers_count"`
-			FollowingCount int64	`json:"followings_count"`
+		ResponseWithJSON(w, 200, struct {
+			ID             uuid.UUID `json:"id"`
+			CreatedAt      time.Time `json:"created_at"`
+			UpdatedAt      time.Time `json:"updated_at"`
+			Email          string    `json:"email"`
+			FollowerCount  int64     `json:"followers_count"`
+			FollowingCount int64     `json:"followings_count"`
 		}{
-			ID: userID,
-			CreatedAt: targetInfo.CreatedAt,
-			UpdatedAt: targetInfo.UpdatedAt,
-			Email: targetInfo.Email,
-			FollowerCount: numFollowers,
+			ID:             userID,
+			CreatedAt:      targetInfo.CreatedAt,
+			UpdatedAt:      targetInfo.UpdatedAt,
+			Email:          targetInfo.Email,
+			FollowerCount:  numFollowers,
 			FollowingCount: numFollowings,
-		} )
+		})
 	} else {
-		ResponseWithJSON(w , 200, UserProfile{
-			ID:	targetInfo.ID,
-			CreatedAt: targetInfo.CreatedAt,
-			FollowerCount: numFollowers,
+		ResponseWithJSON(w, 200, UserProfile{
+			ID:             targetInfo.ID,
+			CreatedAt:      targetInfo.CreatedAt,
+			FollowerCount:  numFollowers,
 			FollowingCount: numFollowings,
 		})
 	}

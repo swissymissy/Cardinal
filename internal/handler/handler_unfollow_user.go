@@ -1,14 +1,14 @@
-package handler 
+package handler
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 
-	"github.com/swissymissy/Cardinal/internal/auth"	
+	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
 )
 
-func (apicfg *ApiConfig) HandlerUnfollow ( w http.ResponseWriter, r  *http.Request) {
+func (apicfg *ApiConfig) HandlerUnfollow(w http.ResponseWriter, r *http.Request) {
 	// get user's access token
 	accessToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
@@ -29,7 +29,7 @@ func (apicfg *ApiConfig) HandlerUnfollow ( w http.ResponseWriter, r  *http.Reque
 	if err != nil {
 		fmt.Printf("Error decoding request: %s\n", err)
 		msg := "Something went wrong"
-		ResponseWithError(w, 500, msg )
+		ResponseWithError(w, 500, msg)
 		return
 	}
 	followerID := userID
@@ -41,11 +41,11 @@ func (apicfg *ApiConfig) HandlerUnfollow ( w http.ResponseWriter, r  *http.Reque
 	})
 	if err != nil {
 		fmt.Printf("Error unfollowing user: %s\n", err)
-		ResponseWithError(w, 500 , "Failed to unfollow. Try again.")
+		ResponseWithError(w, 500, "Failed to unfollow. Try again.")
 		return
 	}
 
-	ResponseWithJSON(w, 200 , struct{
+	ResponseWithJSON(w, 200, struct {
 		Message string `json:"message"`
 	}{
 		Message: "Successfully unfollowed",
