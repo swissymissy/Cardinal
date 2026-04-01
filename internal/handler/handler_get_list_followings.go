@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
 )
 
