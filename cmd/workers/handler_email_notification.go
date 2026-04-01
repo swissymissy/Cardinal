@@ -58,7 +58,7 @@ func (wkrcfg *WorkerConfig) sendChirpEmail(email string, event pubsub.ChirpEvent
 	}
 	message.Subject(fmt.Sprintf("New chirp from %s!", event.Username))
 	message.SetBodyString(mail.TypeTextPlain, fmt.Sprintf(
-		"Someone you follow posted a new chirp:\n\n%s", event.Body,
+		"%s has posted a new chirp:\n\n%s", event.Username, event.Body,
 	))
 
 	// create client and send

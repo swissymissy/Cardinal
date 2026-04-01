@@ -18,7 +18,7 @@ ORDER BY f.created_at DESC;
 -- name: GetFollowers :many
 SELECT f.follower_id, f.created_at, u.username 
 FROM followers f
-JOIN users u ON u.id = f.followers_id
+JOIN users u ON u.id = f.follower_id
 WHERE f.followee_id = $1
 ORDER BY f.created_at DESC;
 
