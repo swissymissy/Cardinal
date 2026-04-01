@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
 	"database/sql"
-	"strconv"
+	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
-	_ "github.com/lib/pq"
-	"github.com/swissymissy/Cardinal/internal/pubsub"
-	"github.com/swissymissy/Cardinal/internal/database"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/swissymissy/Cardinal/internal/database"
+	"github.com/swissymissy/Cardinal/internal/pubsub"
 )
 
 func main() {
@@ -40,9 +40,9 @@ func main() {
 
 	// create worker config
 	wkrcfg := WorkerConfig{
-		DB: dbQuery,
-		SMTPHost: smtpHost,
-		SMTPPort: smtpPort,
+		DB:           dbQuery,
+		SMTPHost:     smtpHost,
+		SMTPPort:     smtpPort,
 		SMTPUsername: smtpUsername,
 		SMTPPassword: smtpPassword,
 	}

@@ -32,7 +32,7 @@ const (
 type ChirpEvent struct {
 	Body      string    `json:"body"`
 	Triggerer uuid.UUID `json:"triggerer"`
-	Username  string 	`json:"username"`
+	Username  string    `json:"username"`
 	ChirpID   uuid.UUID `json:"chirp_id"`
 	CreatedAt time.Time `json:"created_at"`
 }

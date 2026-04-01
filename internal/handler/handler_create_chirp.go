@@ -56,7 +56,7 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 		ResponseWithError(w, 500, msg)
 		return
 	}
-	// get username 
+	// get username
 	user, err := apicfg.DB.GetUserByID(r.Context(), createdChirp.UserID)
 	if err != nil {
 		fmt.Printf("Error fetching user: %s\n", err)
