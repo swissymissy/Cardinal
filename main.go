@@ -30,7 +30,7 @@ func main() {
 	dbQuery := database.New(db)
 
 	// connect to rabbitmq
-	rabbitConnectionStr := "amqp://guest:guest@localhost:5672/"
+	rabbitConnectionStr := os.Getenv("RABBITMQ_URL")
 	conn, err := amqp.Dial(rabbitConnectionStr)
 	if err != nil {
 		fmt.Printf("Failed to establish connection to Rabbit server: %s\n", err)

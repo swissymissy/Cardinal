@@ -48,7 +48,7 @@ func main() {
 	}
 
 	// connect to rabbitmq
-	rabbitConnectionStr := "amqp://guest:guest@localhost:5672/"
+	rabbitConnectionStr := os.Getenv("RABBITMQ_URL")
 	conn, err := amqp.Dial(rabbitConnectionStr)
 	if err != nil {
 		fmt.Printf("Failed to establish connection to Rabbit server: %s\n", err)
@@ -68,6 +68,21 @@ func main() {
 	)
 	if err != nil {
 		fmt.Printf("Failed to subscribe to email queue: %s\n", err)
+		return
+	}
+
+	// subscribe to "push" queue
+	err = pubsub.SubscribeJSON(
+		conn,
+		"notifications",
+		"push",
+		"",
+		pubsub.Durable,
+		pubsub.ExchangeFanout,
+		wkrcfg.HandlerPushNotification,
+	)
+	if err != nil {
+		fmt.Printf("Failed to subscribe to push notification queue: %s\n", err)
 		return
 	}
 
