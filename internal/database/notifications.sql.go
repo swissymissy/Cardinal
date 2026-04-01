@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 const createNotifications = `-- name: CreateNotifications :one
@@ -45,6 +46,28 @@ func (q *Queries) CreateNotifications(ctx context.Context, arg CreateNotificatio
 		&i.IsRead,
 	)
 	return i, err
+}
+
+const createNotificationsBulk = `-- name: CreateNotificationsBulk :exec
+INSERT INTO notifications (body, receiver, triggerer, chirp_id, created_at)
+SELECT $1, unnest($2::uuid[]), $3, $4, NOW()
+`
+
+type CreateNotificationsBulkParams struct {
+	Body      string
+	Column2   []uuid.UUID
+	Triggerer uuid.UUID
+	ChirpID   uuid.UUID
+}
+
+func (q *Queries) CreateNotificationsBulk(ctx context.Context, arg CreateNotificationsBulkParams) error {
+	_, err := q.db.ExecContext(ctx, createNotificationsBulk,
+		arg.Body,
+		pq.Array(arg.Column2),
+		arg.Triggerer,
+		arg.ChirpID,
+	)
+	return err
 }
 
 const getNotificationByReceiver = `-- name: GetNotificationByReceiver :many

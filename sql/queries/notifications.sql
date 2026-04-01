@@ -21,3 +21,6 @@ UPDATE notifications
 SET is_read = true 
 WHERE receiver = $1;
 
+-- name: CreateNotificationsBulk :exec
+INSERT INTO notifications (body, receiver, triggerer, chirp_id, created_at)
+SELECT $1, unnest($2::uuid[]), $3, $4, NOW();
