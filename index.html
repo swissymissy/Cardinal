@@ -1,6 +1,18 @@
-<html>
-  <body>
-    <h1>Welcome to Cardinal</h1>
-    <img src="./assets/cardinal.jpg" alt="Cardinal bird" width="400">
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cardinal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <script src="/js/auth.js"></script>
+  <script>
+    if (localStorage.getItem("access_token")) {
+      window.location.href = "/dashboard.html";
+    } else {
+      window.location.href = "/login.html";
+    }
+  </script>
+</body>
 </html>

@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8080"; // change port if needed
+const API_BASE = "";
 
 async function apiRequest(endpoint, method, body = null, token = null) {
   const headers = {
@@ -15,6 +15,34 @@ async function apiRequest(endpoint, method, body = null, token = null) {
     body: body ? JSON.stringify(body) : null,
   });
 
-  const data = await res.json();
-  return data;
+  return res;
+}
+
+// authenticated request with silent token refresh on 401
+async function apiRequestAuth(endpoint, method, body = null) {
+  let token = getAccessToken();
+  let res = await apiRequest(endpoint, method, body, token);
+
+  if (res.status === 401) {
+    // try silent refresh
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+      logout();
+      return null;
+    }
+
+    const refreshRes = await apiRequest("/api/refresh", "POST", null, refreshToken);
+    if (!refreshRes.ok) {
+      logout();
+      return null;
+    }
+
+    const refreshData = await refreshRes.json();
+    saveAccessToken(refreshData.token);
+
+    // retry original request with new token
+    res = await apiRequest(endpoint, method, body, refreshData.token);
+  }
+
+  return res;
 }

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile – Cardinal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div id="profileContent"><div class="empty-state">Loading...</div></div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    requireAuth();
+    initNav();
+
+    const params = new URLSearchParams(window.location.search);
+    const identifier = params.get("user") || getCurrentUserID();
+    const myID = getCurrentUserID();
+
+    function formatDate(isoString) {
+      return new Date(isoString).toLocaleDateString("en-US", { year: "numeric", month: "long" });
+    }
+
+    function formatTime(isoString) {
+      const date = new Date(isoString);
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000);
+      if (diff < 60) return `${diff}s ago`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return date.toLocaleDateString();
+    }
+
+    async function isFollowing(targetID) {
+      const res = await apiRequestAuth(`/api/users/${myID}/followings`, "GET");
+      if (!res || !res.ok) return false;
+      const list = await res.json();
+      return list.some(f => f.user_id === targetID);
+    }
+
+    async function follow(targetID) {
+      await apiRequestAuth("/api/newfollow", "POST", { followee_id: targetID });
+      loadProfile();
+    }
+
+    async function unfollow(targetID) {
+      await apiRequestAuth("/api/unfollow", "DELETE", { followee_id: targetID });
+      loadProfile();
+    }
+
+    async function deleteChirp(id) {
+      if (!confirm("Delete this chirp?")) return;
+      await apiRequestAuth(`/api/chirps/${id}`, "DELETE");
+      loadProfile();
+    }
+
+    async function loadTab(targetID, tab) {
+      const chirpsEl = document.getElementById("tabContent");
+      chirpsEl.innerHTML = `<div class="empty-state">Loading...</div>`;
+
+      if (tab === "chirps") {
+        const res = await fetch(`/api/getallchirps?author_id=${targetID}&sort=desc`);
+        const chirps = res.ok ? await res.json() : [];
+        if (!chirps || chirps.length === 0) {
+          chirpsEl.innerHTML = `<div class="empty-state">No chirps yet.</div>`;
+          return;
+        }
+        chirpsEl.innerHTML = chirps.map(c => `
+          <div class="chirp-card">
+            <div class="chirp-card-header">
+              <span class="chirp-time">${formatTime(c.created_at)}</span>
+              ${c.user_id === myID ? `<button class="btn btn-sm btn-danger" onclick="deleteChirp('${c.id}')">Delete</button>` : ""}
+            </div>
+            <div class="chirp-body">${c.body}</div>
+          </div>
+        `).join("");
+      } else if (tab === "followers") {
+        const res = await fetch(`/api/users/${targetID}/followers`);
+        const list = res.ok ? await res.json() : [];
+        if (!list || list.length === 0) {
+          chirpsEl.innerHTML = `<div class="empty-state">No followers yet.</div>`;
+          return;
+        }
+        chirpsEl.innerHTML = list.map(f => `
+          <div class="user-item">
+            <a class="user-item-name" href="/profile.html?user=${f.user_id}">@${f.username}</a>
+          </div>
+        `).join("");
+      } else if (tab === "following") {
+        const res = await fetch(`/api/users/${targetID}/followings`);
+        const list = res.ok ? await res.json() : [];
+        if (!list || list.length === 0) {
+          chirpsEl.innerHTML = `<div class="empty-state">Not following anyone yet.</div>`;
+          return;
+        }
+        chirpsEl.innerHTML = list.map(f => `
+          <div class="user-item">
+            <a class="user-item-name" href="/profile.html?user=${f.user_id}">@${f.username}</a>
+          </div>
+        `).join("");
+      }
+
+      // update active tab style
+      document.querySelectorAll(".profile-tab").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tab);
+      });
+    }
+
+    async function loadProfile() {
+      const content = document.getElementById("profileContent");
+
+      const res = await apiRequestAuth(`/api/users/${identifier}`, "GET");
+      if (!res || !res.ok) {
+        content.innerHTML = `<div class="empty-state">User not found.</div>`;
+        return;
+      }
+
+      const user = await res.json();
+      const isMe = user.id === myID;
+      const following = isMe ? false : await isFollowing(user.id);
+
+      content.innerHTML = `
+        <div class="card" style="margin-bottom:20px">
+          <div class="profile-header">
+            <div class="profile-info">
+              <h2>@${user.username}</h2>
+              <div class="profile-meta">Joined ${formatDate(user.created_at)}${isMe ? ` · ${user.email}` : ""}</div>
+              <div class="profile-stats">
+                <div><span>${user.followers_count}</span> Followers</div>
+                <div><span>${user.followings_count}</span> Following</div>
+              </div>
+            </div>
+            ${!isMe ? `
+              <button class="btn ${following ? "btn-danger" : "btn-primary"}"
+                onclick="${following ? `unfollow('${user.id}')` : `follow('${user.id}')`}">
+                ${following ? "Unfollow" : "Follow"}
+              </button>
+            ` : ""}
+          </div>
+        </div>
+
+        <div class="profile-tabs">
+          <button class="profile-tab active" data-tab="chirps" onclick="loadTab('${user.id}', 'chirps')">Chirps</button>
+          <button class="profile-tab" data-tab="followers" onclick="loadTab('${user.id}', 'followers')">Followers</button>
+          <button class="profile-tab" data-tab="following" onclick="loadTab('${user.id}', 'following')">Following</button>
+        </div>
+
+        <div id="tabContent"></div>
+      `;
+
+      loadTab(user.id, "chirps");
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

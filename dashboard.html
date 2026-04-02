@@ -1,30 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Feed – Cardinal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
 <body>
-  <h2>Post a Chirp</h2>
+  <div class="container">
+    <div class="compose-box">
+      <textarea id="chirpInput" placeholder="What's happening?"></textarea>
+      <div class="compose-footer">
+        <span id="charCount" style="font-size:0.8rem;color:var(--text-muted);margin-right:10px"></span>
+        <button class="btn btn-primary" onclick="postChirp()">Post</button>
+      </div>
+    </div>
 
-  <textarea id="chirp" placeholder="What's happening?"></textarea>
-  <br />
-  <button onclick="postChirp()">Post</button>
-  <button onclick="logout()">Logout</button>
+    <div id="feed"></div>
+  </div>
 
-  <script src="js/api.js"></script>
-  <script src="js/auth.js"></script>
-
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/nav.js"></script>
   <script>
+    requireAuth();
+    initNav();
+
+    const MAX_CHARS = 140;
+    const chirpInput = document.getElementById("chirpInput");
+
+    chirpInput.addEventListener("input", () => {
+      const remaining = MAX_CHARS - chirpInput.value.length;
+      const el = document.getElementById("charCount");
+      el.textContent = `${chirpInput.value.length}/${MAX_CHARS}`;
+      el.style.color = remaining < 20 ? "#b91c1c" : "var(--text-muted)";
+    });
+
     async function postChirp() {
-      const body = document.getElementById("chirp").value;
-      const token = getAccessToken();
+      const body = chirpInput.value.trim();
+      if (!body) return;
+      if (body.length > MAX_CHARS) {
+        alert("Chirp is too long.");
+        return;
+      }
 
-      const res = await apiRequest(
-        "/api/newchirp",
-        "POST",
-        { body },
-        token
-      );
+      const res = await apiRequestAuth("/api/newchirp", "POST", { body });
+      if (!res || !res.ok) {
+        alert("Failed to post chirp.");
+        return;
+      }
 
-      alert("Chirp posted!");
+      chirpInput.value = "";
+      document.getElementById("charCount").textContent = "";
+      loadFeed();
     }
+
+    function formatTime(isoString) {
+      const date = new Date(isoString);
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000);
+      if (diff < 60) return `${diff}s ago`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return date.toLocaleDateString();
+    }
+
+    async function deleteChirp(id) {
+      if (!confirm("Delete this chirp?")) return;
+      const res = await apiRequestAuth(`/api/chirps/${id}`, "DELETE");
+      if (!res || !res.ok) {
+        alert("Failed to delete chirp.");
+        return;
+      }
+      loadFeed();
+    }
+
+    async function loadFeed() {
+      const feed = document.getElementById("feed");
+      feed.innerHTML = `<div class="empty-state">Loading...</div>`;
+
+      const res = await fetch("/api/getallchirps?sort=desc");
+      if (!res.ok) {
+        feed.innerHTML = `<div class="empty-state">Failed to load feed.</div>`;
+        return;
+      }
+
+      const chirps = await res.json();
+      const myID = getCurrentUserID();
+
+      if (!chirps || chirps.length === 0) {
+        feed.innerHTML = `<div class="empty-state">No chirps yet. Be the first to post!</div>`;
+        return;
+      }
+
+      feed.innerHTML = chirps.map(chirp => `
+        <div class="chirp-card">
+          <div class="chirp-card-header">
+            <a class="chirp-author" href="/profile.html?user=${chirp.user_id}">@${chirp.username || "unknown"}</a>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="chirp-time">${formatTime(chirp.created_at)}</span>
+              ${chirp.user_id === myID ? `<button class="btn btn-sm btn-danger" onclick="deleteChirp('${chirp.id}')">Delete</button>` : ""}
+            </div>
+          </div>
+          <div class="chirp-body">${chirp.body}</div>
+        </div>
+      `).join("");
+    }
+
+    loadFeed();
   </script>
 </body>
 </html>
