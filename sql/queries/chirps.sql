@@ -10,13 +10,17 @@ VALUES (
 RETURNING *;
 
 -- name: GetAllChirps :many
-SELECT * FROM chirps
-ORDER BY created_at ASC;
+SELECT c.*, u.username
+FROM chirps c
+JOIN users u ON u.id = c.user_id
+ORDER BY c.created_at ASC;
 
 -- name: GetAllChirpsFromUserID :many
-SELECT * FROM chirps 
-WHERE user_id = $1
-ORDER BY created_at ASC;
+SELECT c.*, u.username
+FROM chirps c 
+JOIN users u ON u.id = c.user_id 
+WHERE c.user_id = $1
+ORDER BY c.created_at ASC;
 
 -- name: DeleteOneChirp :exec
 DELETE FROM chirps

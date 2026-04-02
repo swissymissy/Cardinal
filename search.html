@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Search – Cardinal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="page-title">Search Users</div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Enter exact username or user ID" />
+      <button class="btn btn-primary" onclick="search()">Search</button>
+    </div>
+
+    <div id="searchResult"></div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    requireAuth();
+    initNav();
+
+    document.getElementById("searchInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") search();
+    });
+
+    async function search() {
+      const query = document.getElementById("searchInput").value.trim();
+      const resultEl = document.getElementById("searchResult");
+
+      if (!query) {
+        resultEl.innerHTML = `<div class="empty-state">Enter a username or user ID to search.</div>`;
+        return;
+      }
+
+      resultEl.innerHTML = `<div class="empty-state">Searching...</div>`;
+
+      const res = await apiRequestAuth(`/api/users/${encodeURIComponent(query)}`, "GET");
+
+      if (!res || res.status === 404) {
+        resultEl.innerHTML = `<div class="empty-state">No user found for "<strong>${query}</strong>".</div>`;
+        return;
+      }
+
+      if (!res.ok) {
+        resultEl.innerHTML = `<div class="empty-state">Something went wrong. Try again.</div>`;
+        return;
+      }
+
+      const user = await res.json();
+
+      resultEl.innerHTML = `
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-weight:700;font-size:1.1rem">@${user.username}</div>
+              <div style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">
+                ${user.followers_count} followers · ${user.followings_count} following
+              </div>
+            </div>
+            <a href="/profile.html?user=${user.id}" class="btn btn-primary">View Profile</a>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
