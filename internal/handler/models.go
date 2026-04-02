@@ -76,7 +76,7 @@ type Notification struct {
 	CreatedAt time.Time `json:"created_at"`
 	Body      string    `json:"body"`
 	Receiver  uuid.UUID `json:"receiver"`
-	Triggerer uuid.UUID `json:"author"`
+	Username  string    `json:"author"`
 	ChirpID   uuid.UUID `json:"chirp_id"`
 	IsRead    bool      `json:"is_read"`
 }

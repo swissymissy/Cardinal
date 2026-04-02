@@ -7,9 +7,11 @@ VALUES (
 RETURNING *;
 
 -- name: GetNotificationByReceiver :many
-SELECT * FROM notifications
-WHERE receiver = $1
-ORDER BY created_at DESC;
+SELECT n.id, n.created_at, n.body, n.receiver, n.triggerer, n.chirp_id, n.is_read, u.username
+FROM notifications n 
+JOIN users u ON u.id = n.triggerer
+WHERE n.receiver = $1
+ORDER BY n.created_at DESC;
 
 -- name: MarkOneAsRead :exec
 UPDATE notifications 

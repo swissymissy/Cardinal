@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -71,20 +72,33 @@ func (q *Queries) CreateNotificationsBulk(ctx context.Context, arg CreateNotific
 }
 
 const getNotificationByReceiver = `-- name: GetNotificationByReceiver :many
-SELECT id, created_at, body, receiver, triggerer, chirp_id, is_read FROM notifications
-WHERE receiver = $1
-ORDER BY created_at DESC
+SELECT n.id, n.created_at, n.body, n.receiver, n.triggerer, n.chirp_id, n.is_read, u.username
+FROM notifications n 
+JOIN users u ON u.id = n.triggerer
+WHERE n.receiver = $1
+ORDER BY n.created_at DESC
 `
 
-func (q *Queries) GetNotificationByReceiver(ctx context.Context, receiver uuid.UUID) ([]Notification, error) {
+type GetNotificationByReceiverRow struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	Body      string
+	Receiver  uuid.UUID
+	Triggerer uuid.UUID
+	ChirpID   uuid.UUID
+	IsRead    bool
+	Username  string
+}
+
+func (q *Queries) GetNotificationByReceiver(ctx context.Context, receiver uuid.UUID) ([]GetNotificationByReceiverRow, error) {
 	rows, err := q.db.QueryContext(ctx, getNotificationByReceiver, receiver)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Notification
+	var items []GetNotificationByReceiverRow
 	for rows.Next() {
-		var i Notification
+		var i GetNotificationByReceiverRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
@@ -93,6 +107,7 @@ func (q *Queries) GetNotificationByReceiver(ctx context.Context, receiver uuid.U
 			&i.Triggerer,
 			&i.ChirpID,
 			&i.IsRead,
+			&i.Username,
 		); err != nil {
 			return nil, err
 		}

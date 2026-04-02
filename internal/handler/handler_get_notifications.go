@@ -37,7 +37,7 @@ func (apicfg *ApiConfig) HandlerGetNotifications(w http.ResponseWriter, r *http.
 			CreatedAt: noti.CreatedAt,
 			Body:      noti.Body,
 			Receiver:  noti.Receiver,
-			Triggerer: noti.Triggerer,
+			Username:  noti.Username,
 			ChirpID:   noti.ChirpID,
 			IsRead:    noti.IsRead,
 		})
