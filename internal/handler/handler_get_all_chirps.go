@@ -6,7 +6,6 @@ import (
 	"sort"
 
 	"github.com/google/uuid"
-	"github.com/swissymissy/Cardinal/internal/database"
 )
 
 func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Request) {
@@ -18,17 +17,20 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 		desc = true
 	}
 
-	// fetch data according to query parameter
-	var chirpList []database.Chirp
-	var err error
+	var list []CreatedChirp
 
 	if authorID == "" {
-		// author id is not given
-		chirpList, err = apicfg.DB.GetAllChirps(r.Context())
+		rows, err := apicfg.DB.GetAllChirps(r.Context())
 		if err != nil {
-			fmt.Printf("Error getting all chirps : %s\n", err)
+			fmt.Printf("Error getting all chirps: %s\n", err)
 			ResponseWithError(w, http.StatusInternalServerError, "Can't get chirps. Try again")
 			return
+		}
+		for _, c := range rows {
+			list = append(list, CreatedChirp{
+				ID: c.ID, CreatedAt: c.CreatedAt, UpdatedAt: c.UpdatedAt,
+				Body: c.Body, UserID: c.UserID, Username: c.Username,
+			})
 		}
 	} else {
 		userID, err := uuid.Parse(authorID)
@@ -36,31 +38,25 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 			ResponseWithError(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
-
-		chirpList, err = apicfg.DB.GetAllChirpsFromUserID(r.Context(), userID)
+		rows, err := apicfg.DB.GetAllChirpsFromUserID(r.Context(), userID)
 		if err != nil {
 			ResponseWithError(w, http.StatusInternalServerError, "Can't get all chirps. Try again")
 			return
+		}
+		for _, c := range rows {
+			list = append(list, CreatedChirp{
+				ID: c.ID, CreatedAt: c.CreatedAt, UpdatedAt: c.UpdatedAt,
+				Body: c.Body, UserID: c.UserID, Username: c.Username,
+			})
 		}
 	}
 
 	// desc order
 	if desc {
-		sort.Slice(chirpList, func(i, j int) bool {
-			return chirpList[i].CreatedAt.After(chirpList[j].CreatedAt)
+		sort.Slice(list, func(i, j int) bool {
+			return list[i].CreatedAt.After(list[j].CreatedAt)
 		})
 	}
 
-	// writing each chirp to response
-	var list []CreatedChirp
-	for _, chirp := range chirpList {
-		list = append(list, CreatedChirp{
-			ID:        chirp.ID,
-			CreatedAt: chirp.CreatedAt,
-			UpdatedAt: chirp.UpdatedAt,
-			Body:      chirp.Body,
-			UserID:    chirp.UserID,
-		})
-	}
 	ResponseWithJSON(w, http.StatusOK, list)
 }

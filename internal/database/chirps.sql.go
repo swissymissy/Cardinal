@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -52,25 +53,37 @@ func (q *Queries) DeleteOneChirp(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllChirps = `-- name: GetAllChirps :many
-SELECT id, created_at, updated_at, body, user_id FROM chirps
-ORDER BY created_at ASC
+SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username
+FROM chirps c
+JOIN users u ON u.id = c.user_id
+ORDER BY c.created_at ASC
 `
 
-func (q *Queries) GetAllChirps(ctx context.Context) ([]Chirp, error) {
+type GetAllChirpsRow struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Body      string
+	UserID    uuid.UUID
+	Username  string
+}
+
+func (q *Queries) GetAllChirps(ctx context.Context) ([]GetAllChirpsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllChirps)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Chirp
+	var items []GetAllChirpsRow
 	for rows.Next() {
-		var i Chirp
+		var i GetAllChirpsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Body,
 			&i.UserID,
+			&i.Username,
 		); err != nil {
 			return nil, err
 		}
@@ -86,26 +99,38 @@ func (q *Queries) GetAllChirps(ctx context.Context) ([]Chirp, error) {
 }
 
 const getAllChirpsFromUserID = `-- name: GetAllChirpsFromUserID :many
-SELECT id, created_at, updated_at, body, user_id FROM chirps 
-WHERE user_id = $1
-ORDER BY created_at ASC
+SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username
+FROM chirps c 
+JOIN users u ON u.id = c.user_id 
+WHERE c.user_id = $1
+ORDER BY c.created_at ASC
 `
 
-func (q *Queries) GetAllChirpsFromUserID(ctx context.Context, userID uuid.UUID) ([]Chirp, error) {
+type GetAllChirpsFromUserIDRow struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Body      string
+	UserID    uuid.UUID
+	Username  string
+}
+
+func (q *Queries) GetAllChirpsFromUserID(ctx context.Context, userID uuid.UUID) ([]GetAllChirpsFromUserIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllChirpsFromUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Chirp
+	var items []GetAllChirpsFromUserIDRow
 	for rows.Next() {
-		var i Chirp
+		var i GetAllChirpsFromUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Body,
 			&i.UserID,
+			&i.Username,
 		); err != nil {
 			return nil, err
 		}

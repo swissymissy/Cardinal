@@ -243,6 +243,11 @@ a:hover {
   line-height: 1.5;
 }
 
+.chirp-card:target {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px rgba(196,30,58,0.2);
+}
+
 /* COMPOSE BOX */
 .compose-box {
   background: var(--card);

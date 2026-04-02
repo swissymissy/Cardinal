@@ -94,7 +94,7 @@
       }
 
       feed.innerHTML = chirps.map(chirp => `
-        <div class="chirp-card">
+        <div class="chirp-card" id="chirp-${chirp.id}">
           <div class="chirp-card-header">
             <a class="chirp-author" href="/profile.html?user=${chirp.user_id}">@${chirp.username || "unknown"}</a>
             <div style="display:flex;align-items:center;gap:8px">

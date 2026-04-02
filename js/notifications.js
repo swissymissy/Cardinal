@@ -36,12 +36,12 @@ function renderDropdown(notifications) {
   } else {
     for (const n of notifications) {
       html += `
-        <div class="notif-item ${n.is_read ? "" : "unread"}">
+        <div class="notif-item ${n.is_read ? "" : "unread"}" style="cursor:pointer" onclick="goToChirp('${n.chirp_id}', '${n.notif_id}', ${n.is_read})">
           <div class="notif-item-body">
             <div>${n.body}</div>
             <div class="notif-item-time">${formatTime(n.created_at)}</div>
           </div>
-          ${!n.is_read ? `<button class="btn btn-sm btn-ghost" onclick="markOneRead('${n.notif_id}')">✓</button>` : ""}
+          ${!n.is_read ? `<button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); markOneRead('${n.notif_id}')">✓</button>` : ""}
         </div>
       `;
     }
@@ -75,6 +75,13 @@ async function markAllRead() {
 async function markOneRead(notifID) {
   await apiRequestAuth(`/api/notifications/${notifID}`, "PUT");
   await refreshNotifications();
+}
+
+async function goToChirp(chirpID, notifID, isRead) {
+  if (!isRead) {
+    await apiRequestAuth(`/api/notifications/${notifID}`, "PUT");
+  }
+  window.location.href = `/dashboard.html#chirp-${chirpID}`;
 }
 
 function initNotificationBell() {
