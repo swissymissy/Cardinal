@@ -6,16 +6,15 @@ import (
 	"net/http"
 	"os"
 
-	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/swissymissy/Cardinal/internal/database"
 	"github.com/swissymissy/Cardinal/internal/handler"
 )
 
 func main() {
 
-	// get values from .env
 	godotenv.Load()
 	port := os.Getenv("PORT")            // load port
 	platform := os.Getenv("PLATFORM")    // check if is dev
@@ -31,7 +30,7 @@ func main() {
 	dbQuery := database.New(db)
 
 	// connect to rabbitmq
-	rabbitConnectionStr := "amqp://guest:guest@localhost:5672/"
+	rabbitConnectionStr := os.Getenv("RABBITMQ_URL")
 	conn, err := amqp.Dial(rabbitConnectionStr)
 	if err != nil {
 		fmt.Printf("Failed to establish connection to Rabbit server: %s\n", err)
@@ -84,6 +83,9 @@ func main() {
 	mux.HandleFunc("GET /api/users/{identifier}", apicfg.HandlerGetUser)
 	mux.HandleFunc("GET /api/users/{userID}/followers", apicfg.HandlerGetFollowers)
 	mux.HandleFunc("GET /api/users/{userID}/followings", apicfg.HandlerGetFollowings)
+	mux.HandleFunc("GET /api/notifications", apicfg.HandlerGetNotifications)
+	mux.HandleFunc("PUT /api/notifications", apicfg.HandlerMarkAllRead)
+	mux.HandleFunc("PUT /api/notifications/{notifID}", apicfg.HandlerMarkOneRead)
 
 	// start server
 	err = cardinalServer.ListenAndServe()

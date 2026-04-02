@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/pubsub"
 	"github.com/wneessen/go-mail"
-	"github.com/google/uuid"
 )
 
 // handler to send email notification to the followers' email
@@ -19,7 +19,7 @@ func (wkrcfg *WorkerConfig) HandlerEmailNotification(event pubsub.ChirpEvent) pu
 	}
 	if len(emails) == 0 {
 		fmt.Println("No follower to send email")
-		return pubsub.Ack 
+		return pubsub.Ack
 	}
 
 	for _, email := range emails {
@@ -31,7 +31,6 @@ func (wkrcfg *WorkerConfig) HandlerEmailNotification(event pubsub.ChirpEvent) pu
 	return pubsub.Ack
 }
 
-
 // helper 1: function geting followers email from DB
 func (wkrcfg *WorkerConfig) getFollowerEmails(ctx context.Context, triggererID uuid.UUID) ([]string, error) {
 	followersEmail, err := wkrcfg.DB.GetFollowersEmail(ctx, triggererID)
@@ -41,7 +40,7 @@ func (wkrcfg *WorkerConfig) getFollowerEmails(ctx context.Context, triggererID u
 
 	// extract emails
 	emails := make([]string, len(followersEmail))
-	for i, e := range followersEmail{
+	for i, e := range followersEmail {
 		emails[i] = e.Email
 	}
 	return emails, nil
@@ -59,7 +58,7 @@ func (wkrcfg *WorkerConfig) sendChirpEmail(email string, event pubsub.ChirpEvent
 	}
 	message.Subject(fmt.Sprintf("New chirp from %s!", event.Username))
 	message.SetBodyString(mail.TypeTextPlain, fmt.Sprintf(
-		"Someone you follow posted a new chirp:\n\n%s", event.Body,
+		"%s has posted a new chirp:\n\n%s", event.Username, event.Body,
 	))
 
 	// create client and send

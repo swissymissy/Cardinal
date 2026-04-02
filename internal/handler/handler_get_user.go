@@ -31,7 +31,7 @@ func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) 
 	// get user's identifier
 	target := r.PathValue("identifier")
 	var targetID uuid.UUID
-	var targetInfo database.User 
+	var targetInfo database.User
 
 	if id, err := uuid.Parse(target); err == nil {
 		targetID = id
@@ -58,7 +58,7 @@ func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) 
 		}
 		targetID = targetInfo.ID
 	}
-	
+
 	// retrieve user's number of followers
 	numFollowers, err := apicfg.DB.GetCountFollowers(r.Context(), targetID)
 	if err != nil {
@@ -77,7 +77,7 @@ func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) 
 	if targetID == userID {
 		ResponseWithJSON(w, 200, struct {
 			ID             uuid.UUID `json:"id"`
-			Username 	   string    `json:"username"`
+			Username       string    `json:"username"`
 			CreatedAt      time.Time `json:"created_at"`
 			UpdatedAt      time.Time `json:"updated_at"`
 			Email          string    `json:"email"`
@@ -85,7 +85,7 @@ func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) 
 			FollowingCount int64     `json:"followings_count"`
 		}{
 			ID:             userID,
-			Username:		targetInfo.Username,
+			Username:       targetInfo.Username,
 			CreatedAt:      targetInfo.CreatedAt,
 			UpdatedAt:      targetInfo.UpdatedAt,
 			Email:          targetInfo.Email,
@@ -95,7 +95,7 @@ func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) 
 	} else {
 		ResponseWithJSON(w, 200, UserProfile{
 			ID:             targetInfo.ID,
-			Username:		targetInfo.Username,
+			Username:       targetInfo.Username,
 			CreatedAt:      targetInfo.CreatedAt,
 			FollowerCount:  numFollowers,
 			FollowingCount: numFollowings,

@@ -21,7 +21,7 @@ func (apicfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Reques
 	}
 	userEmail := newUser.Email
 	userPassword := newUser.Password
-	userName := newUser.Username 
+	userName := newUser.Username
 
 	// hash password
 	hashed, err := auth.HashPassword(userPassword)
@@ -35,7 +35,7 @@ func (apicfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Reques
 	user, err := apicfg.DB.CreateUser(r.Context(), database.CreateUserParams{
 		Email:          userEmail,
 		HashedPassword: hashed,
-		Username:		userName,
+		Username:       userName,
 	})
 	if err != nil {
 		fmt.Printf("Error inserting new user: %s\n", err)

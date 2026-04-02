@@ -11,13 +11,13 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
-	Username  string 	`json:"username"`
+	Username  string    `json:"username"`
 }
 
 type NewUser struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	Username string	`json:"username"`
+	Username string `json:"username"`
 }
 
 type LoginUser struct {
@@ -31,7 +31,7 @@ type LoginUser struct {
 
 type UserProfile struct {
 	ID             uuid.UUID `json:"id"`
-	Username 	   string 	 `json:"username"`
+	Username       string    `json:"username"`
 	CreatedAt      time.Time `json:"created_at"`
 	FollowerCount  int64     `json:"followers_count"`
 	FollowingCount int64     `json:"followings_count"`
@@ -47,7 +47,7 @@ type CreatedChirp struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Body      string    `json:"body"`
 	UserID    uuid.UUID `json:"user_id"`
-	Username  string 	`json:"username"`
+	Username  string    `json:"username"`
 }
 
 type ResponseAccessToken struct {
@@ -67,6 +67,16 @@ type Follower struct {
 
 type FollowList struct {
 	UserID    uuid.UUID `json:"user_id"`
-	Username  string 	`json:"username"`
+	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"followed_at"`
+}
+
+type Notification struct {
+	ID        uuid.UUID `json:"notif_id"`
+	CreatedAt time.Time `json:"created_at"`
+	Body      string    `json:"body"`
+	Receiver  uuid.UUID `json:"receiver"`
+	Username  string    `json:"author"`
+	ChirpID   uuid.UUID `json:"chirp_id"`
+	IsRead    bool      `json:"is_read"`
 }

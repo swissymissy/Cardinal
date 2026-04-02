@@ -5,25 +5,10 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
 )
 
 func (apicfg *ApiConfig) HandlerGetFollowings(w http.ResponseWriter, r *http.Request) {
-	// get user token
-	accessToken, err := auth.GetBearerToken(r.Header)
-	if err != nil {
-		fmt.Printf("Error getting token from header: %s\n", err)
-		ResponseWithError(w, 401, "Invalid Token")
-		return
-	}
-	// validate user token
-	_, err = auth.ValidateJWT(accessToken, apicfg.JWTSecret)
-	if err != nil {
-		fmt.Printf("Invalid token: %s\n", err)
-		ResponseWithError(w, 401, "Invalid Token")
-		return
-	}
 	// get target ID from URL
 	targetIDStr := r.PathValue("userID")
 	targetID, err := uuid.Parse(targetIDStr)
