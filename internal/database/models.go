@@ -19,6 +19,13 @@ type Chirp struct {
 	UserID    uuid.UUID
 }
 
+type EmailVerificationToken struct {
+	Token     uuid.UUID
+	UserID    uuid.UUID
+	CreatedAt time.Time
+	ExpiresAt time.Time
+}
+
 type Follower struct {
 	FollowerID uuid.UUID
 	FolloweeID uuid.UUID
@@ -52,4 +59,5 @@ type User struct {
 	Email          string
 	HashedPassword string
 	Username       string
+	IsVerified     bool
 }

@@ -83,6 +83,7 @@ func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) 
 			Email          string    `json:"email"`
 			FollowerCount  int64     `json:"followers_count"`
 			FollowingCount int64     `json:"followings_count"`
+			IsVerified     bool      `json:"is_verified"`
 		}{
 			ID:             userID,
 			Username:       targetInfo.Username,
@@ -91,6 +92,7 @@ func (apicfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) 
 			Email:          targetInfo.Email,
 			FollowerCount:  numFollowers,
 			FollowingCount: numFollowings,
+			IsVerified:     targetInfo.IsVerified,
 		})
 	} else {
 		ResponseWithJSON(w, 200, UserProfile{
