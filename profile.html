@@ -27,6 +27,7 @@
     }
 
     function formatTime(isoString) {
+      if (!isoString.endsWith("Z") && !isoString.includes("+")) isoString += "Z";
       const date = new Date(isoString);
       const now = new Date();
       const diff = Math.floor((now - date) / 1000);
@@ -129,7 +130,17 @@
           <div class="profile-header">
             <div class="profile-info">
               <h2>@${user.username}</h2>
-              <div class="profile-meta">Joined ${formatDate(user.created_at)}${isMe ? ` · ${user.email}` : ""}</div>
+              <div class="profile-meta">Joined ${formatDate(user.created_at)}</div>
+              ${isMe ? `
+                <div style="margin-top:4px;font-size:0.88rem;color:var(--text-muted)">
+                  ${user.email}
+                  ${user.is_verified
+                    ? `<span style="color:#065f46;margin-left:6px;font-weight:600">&#10003;</span>`
+                    : `<button class="btn btn-sm btn-outline" style="margin-left:8px" onclick="requestVerification()">Verify Email</button>
+                       <span id="verifyMsg" style="margin-left:8px;font-size:0.85rem;color:var(--text-muted);display:none"></span>`
+                  }
+                </div>
+              ` : ""}
               <div class="profile-stats">
                 <div><span>${user.followers_count}</span> Followers</div>
                 <div><span>${user.followings_count}</span> Following</div>
@@ -154,6 +165,25 @@
       `;
 
       loadTab(user.id, "chirps");
+    }
+
+    async function requestVerification() {
+      const btn = document.querySelector("button[onclick='requestVerification()']");
+      if (btn) btn.disabled = true;
+
+      const res = await apiRequestAuth("/api/verify/request", "POST");
+      const msgEl = document.getElementById("verifyMsg");
+      if (!msgEl) return;
+
+      if (!res || !res.ok) {
+        msgEl.textContent = "Failed to send verification email. Try again.";
+        msgEl.style.color = "#b91c1c";
+        if (btn) btn.disabled = false;
+      } else {
+        msgEl.textContent = "Verification email sent. Check your inbox — link valid for 30 days.";
+        msgEl.style.color = "#065f46";
+      }
+      msgEl.style.display = "inline";
     }
 
     loadProfile();

@@ -9,6 +9,7 @@ function getUnreadCount(notifications) {
 }
 
 function formatTime(isoString) {
+  if (!isoString.endsWith("Z") && !isoString.includes("+")) isoString += "Z";
   const date = new Date(isoString);
   const now = new Date();
   const diff = Math.floor((now - date) / 1000);
