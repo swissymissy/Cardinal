@@ -91,6 +91,7 @@ func main() {
 	mux.HandleFunc("POST /api/revoke", apicfg.HandlerRevokeRefreshToken)
 	mux.HandleFunc("POST /api/newchirp", apicfg.HandlerCreateChirp)
 	mux.HandleFunc("GET /api/getallchirps", apicfg.HandlerGetAllChirps)
+	mux.HandleFunc("POST /api/feed", apicfg.HandlerGetFeed)
 	mux.HandleFunc("DELETE /api/chirps/{chirpsID}", apicfg.HandlerDeleteChirp)
 	mux.HandleFunc("GET /api/chirps/{chirpsID}", apicfg.HandlerGetOneChirp)
 	mux.HandleFunc("POST /api/newfollow", apicfg.HandlerFollowUser)
