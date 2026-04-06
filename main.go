@@ -99,6 +99,8 @@ func main() {
 	mux.HandleFunc("GET /api/notifications", apicfg.HandlerGetNotifications)
 	mux.HandleFunc("PUT /api/notifications", apicfg.HandlerMarkAllRead)
 	mux.HandleFunc("PUT /api/notifications/{notifID}", apicfg.HandlerMarkOneRead)
+	mux.HandleFunc("POST /api/verify/request", apicfg.HandlerRequestVerification)
+	mux.HandleFunc("GET /api/verify", apicfg.HandlerVerifyEmail)
 
 	// start server
 	err = cardinalServer.ListenAndServe()
