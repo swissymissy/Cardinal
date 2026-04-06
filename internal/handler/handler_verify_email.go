@@ -1,16 +1,14 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/swissymissy/Cardinal/internal/auth"
 )
 
 func (apicfg *ApiConfig) HandlerVerifyEmail(w http.ResponseWriter, r *http.Request) {
 	tokenIDStr := r.URL.Query().Get("t")
-	if token == "" {
+	if tokenIDStr == "" {
 		http.Redirect(w, r, "/verified.html?error=invalid", http.StatusSeeOther)
 		return
 	}
