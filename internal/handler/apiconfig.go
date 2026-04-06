@@ -16,4 +16,5 @@ type ApiConfig struct {
 	SMTPPort     int
 	SMTPUsername string
 	SMTPPassword string
+	BaseURL      string
 }

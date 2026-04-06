@@ -21,6 +21,7 @@ func main() {
 	platform := os.Getenv("PLATFORM")    // check if is dev
 	dbURL := os.Getenv("DB_URL")         // load db url
 	jwtSecret := os.Getenv("JWT_SECRET") // load jwt secret
+	baseUrl := os.Getenv("BASE_URL")
 	smtpHost := os.Getenv("SMTP_HOST")
 	smtpPassword := os.Getenv("SMTP_PASSWORD")
 	smtpUsername := os.Getenv("SMTP_USERNAME")
@@ -65,6 +66,7 @@ func main() {
 		SMTPPort:     smtpPort,
 		SMTPUsername: smtpUsername,
 		SMTPPassword: smtpPassword,
+		BaseURL:      baseUrl,
 	}
 
 	// server mux
