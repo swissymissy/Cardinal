@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -20,6 +21,14 @@ func main() {
 	platform := os.Getenv("PLATFORM")    // check if is dev
 	dbURL := os.Getenv("DB_URL")         // load db url
 	jwtSecret := os.Getenv("JWT_SECRET") // load jwt secret
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPassword := os.Getenv("SMTP_PASSWORD")
+	smtpUsername := os.Getenv("SMTP_USERNAME")
+	smtpPort, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	if err != nil {
+		fmt.Printf("Invalid SMTP_PORT: %s\n", err)
+		return
+	}
 
 	// open connection to database
 	db, err := sql.Open("postgres", dbURL)
@@ -47,11 +56,15 @@ func main() {
 
 	// create apiConfig
 	apicfg := &handler.ApiConfig{
-		DB:        dbQuery,
-		Port:      port,
-		Platform:  platform,
-		JWTSecret: jwtSecret,
-		MQConn:    conn,
+		DB:           dbQuery,
+		Port:         port,
+		Platform:     platform,
+		JWTSecret:    jwtSecret,
+		MQConn:       conn,
+		SMTPHost:     smtpHost,
+		SMTPPort:     smtpPort,
+		SMTPUsername: smtpUsername,
+		SMTPPassword: smtpPassword,
 	}
 
 	// server mux

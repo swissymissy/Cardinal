@@ -7,9 +7,13 @@ import (
 
 // struct to hold stateful data
 type ApiConfig struct {
-	DB        *database.Queries
-	Port      string
-	Platform  string
-	JWTSecret string
-	MQConn    *amqp.Connection
+	DB           *database.Queries
+	Port         string
+	Platform     string
+	JWTSecret    string
+	MQConn       *amqp.Connection
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUsername string
+	SMTPPassword string
 }
