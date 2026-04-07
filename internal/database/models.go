@@ -43,6 +43,13 @@ type Notification struct {
 	IsRead    bool
 }
 
+type Reaction struct {
+	ChirpID   uuid.UUID
+	UserID    uuid.UUID
+	Type      string
+	CreatedAt time.Time
+}
+
 type RefreshToken struct {
 	Token     string
 	CreatedAt time.Time

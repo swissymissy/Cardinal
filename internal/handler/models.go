@@ -80,3 +80,23 @@ type Notification struct {
 	ChirpID   uuid.UUID `json:"chirp_id"`
 	IsRead    bool      `json:"is_read"`
 }
+
+type Reaction struct {
+	ChirpID   uuid.UUID `json:"chirp_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	Type      string    `json:"type"`
+	CreatedAt time.Time `json:"created_at"`
+	Username  string    `json:"username"`
+}
+
+type ReactionCount struct {
+	Type  string `json:"type"`
+	Count int64  `json:"count"`
+}
+
+type ReactionSummary struct {
+	Counts       []ReactionCount `json:"counts"`
+	Reactors     []Reaction      `json:"reactors"`
+	UserReaction string          `json:"user_reaction"`
+	Total        int64           `json:"total"`
+}
