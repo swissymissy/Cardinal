@@ -36,10 +36,40 @@
       line-height: 1.6;
       margin-bottom: 36px;
     }
-    .landing-actions {
-      display: flex;
-      gap: 12px;
+    .auth-card {
+      width: 100%;
+      max-width: 380px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: left;
     }
+    .auth-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 8px 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .auth-tab.active {
+      color: var(--red);
+      border-bottom-color: var(--red);
+      font-weight: 600;
+    }
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
   </style>
 </head>
 <body>
@@ -49,17 +79,131 @@
     <p class="landing-subtitle">
       A simple social platform. Post short thoughts, follow people you like, and stay in the loop.
     </p>
-    <div class="landing-actions">
-      <a href="/login.html" class="btn btn-primary">Sign in</a>
-      <a href="/register.html" class="btn btn-outline">Create account</a>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Sign in</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Create account</button>
+      </div>
+
+      <!-- Login -->
+      <div class="auth-panel active" id="panel-login">
+        <div class="form-success" id="loginSuccess"></div>
+        <div class="form-error" id="loginError"></div>
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" />
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="login()">Sign in</button>
+      </div>
+
+      <!-- Register -->
+      <div class="auth-panel" id="panel-register">
+        <div class="form-error" id="registerError"></div>
+        <div class="form-group">
+          <label for="regUsername">Username</label>
+          <input type="text" id="regUsername" placeholder="yourname" />
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email</label>
+          <input type="email" id="regEmail" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Password</label>
+          <input type="password" id="regPassword" placeholder="••••••••" />
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="register()">Create account</button>
+      </div>
     </div>
   </div>
 
+  <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
   <script>
     if (getAccessToken()) {
       window.location.href = "/dashboard.html";
     }
+
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach((el, i) => {
+        el.classList.toggle('active', (i === 0) === (tab === 'login'));
+      });
+      document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+      document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+    }
+
+    async function login() {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      const errorEl = document.getElementById("loginError");
+      errorEl.style.display = "none";
+
+      if (!email || !password) {
+        errorEl.textContent = "Please fill in all fields.";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      const res = await apiRequest("/api/userlogin", "POST", { email, password });
+      if (!res.ok) {
+        const data = await res.json();
+        errorEl.textContent = data.error || "Invalid email or password.";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      const data = await res.json();
+      saveTokens(data.access_token, data.refresh_token);
+
+      const userRes = await apiRequest("/api/users/" + data.id, "GET", null, data.access_token);
+      if (userRes.ok) {
+        const user = await userRes.json();
+        saveUserInfo(data.id, user.username);
+      } else {
+        saveUserInfo(data.id, email);
+      }
+
+      window.location.href = "/dashboard.html";
+    }
+
+    async function register() {
+      const username = document.getElementById("regUsername").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value;
+      const errorEl = document.getElementById("registerError");
+      errorEl.style.display = "none";
+
+      if (!username || !email || !password) {
+        errorEl.textContent = "Please fill in all fields.";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      const res = await apiRequest("/api/newuser", "POST", { username, email, password });
+      if (!res.ok) {
+        const data = await res.json();
+        errorEl.textContent = data.error || "Could not create account. Email or username may already be taken.";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      // switch to login tab with success message
+      switchAuthTab('login');
+      const successEl = document.getElementById("loginSuccess");
+      successEl.textContent = "Account created! Please sign in.";
+      successEl.style.display = "block";
+      document.getElementById("loginEmail").value = email;
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      const loginActive = document.getElementById("panel-login").classList.contains("active");
+      if (loginActive) login(); else register();
+    });
   </script>
 </body>
 </html>

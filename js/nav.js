@@ -7,7 +7,6 @@ function initNav() {
   nav.innerHTML = `
     <a href="/dashboard.html" class="nav-logo">Cardinal</a>
     <a href="/dashboard.html" class="nav-link">Feed</a>
-    <a href="/search.html" class="nav-link">Search</a>
     <div class="nav-right">
       <a href="/profile.html?user=${userID}" class="nav-link">@${escapeHTML(username)}</a>
       <div class="notif-bell-wrapper" id="notifBellWrapper">
