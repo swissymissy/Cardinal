@@ -56,8 +56,15 @@ const getAllChirps = `-- name: GetAllChirps :many
 SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username
 FROM chirps c
 JOIN users u ON u.id = c.user_id
-ORDER BY c.created_at ASC
+WHERE c.created_at < $1
+ORDER BY c.created_at DESC
+LIMIT $2
 `
+
+type GetAllChirpsParams struct {
+	CreatedAt time.Time
+	Limit     int32
+}
 
 type GetAllChirpsRow struct {
 	ID        uuid.UUID
@@ -68,8 +75,8 @@ type GetAllChirpsRow struct {
 	Username  string
 }
 
-func (q *Queries) GetAllChirps(ctx context.Context) ([]GetAllChirpsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAllChirps)
+func (q *Queries) GetAllChirps(ctx context.Context, arg GetAllChirpsParams) ([]GetAllChirpsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllChirps, arg.CreatedAt, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +110,16 @@ SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username
 FROM chirps c 
 JOIN users u ON u.id = c.user_id 
 WHERE c.user_id = $1
-ORDER BY c.created_at ASC
+AND c.created_at < $2
+ORDER BY c.created_at DESC
+LIMIT $3
 `
+
+type GetAllChirpsFromUserIDParams struct {
+	UserID    uuid.UUID
+	CreatedAt time.Time
+	Limit     int32
+}
 
 type GetAllChirpsFromUserIDRow struct {
 	ID        uuid.UUID
@@ -115,8 +130,8 @@ type GetAllChirpsFromUserIDRow struct {
 	Username  string
 }
 
-func (q *Queries) GetAllChirpsFromUserID(ctx context.Context, userID uuid.UUID) ([]GetAllChirpsFromUserIDRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAllChirpsFromUserID, userID)
+func (q *Queries) GetAllChirpsFromUserID(ctx context.Context, arg GetAllChirpsFromUserIDParams) ([]GetAllChirpsFromUserIDRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllChirpsFromUserID, arg.UserID, arg.CreatedAt, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -124,6 +139,66 @@ func (q *Queries) GetAllChirpsFromUserID(ctx context.Context, userID uuid.UUID) 
 	var items []GetAllChirpsFromUserIDRow
 	for rows.Next() {
 		var i GetAllChirpsFromUserIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Body,
+			&i.UserID,
+			&i.Username,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFeedChirps = `-- name: GetFeedChirps :many
+SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username
+FROM chirps c 
+JOIN users u ON u.id = c.user_id
+WHERE (
+    c.user_id = $1
+    OR c.user_id IN (
+        SELECT followee_id FROM followers WHERE follower_id = $1
+    )
+)
+AND c.created_at < $2
+ORDER BY c.created_at DESC
+LIMIT $3
+`
+
+type GetFeedChirpsParams struct {
+	UserID    uuid.UUID
+	CreatedAt time.Time
+	Limit     int32
+}
+
+type GetFeedChirpsRow struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Body      string
+	UserID    uuid.UUID
+	Username  string
+}
+
+func (q *Queries) GetFeedChirps(ctx context.Context, arg GetFeedChirpsParams) ([]GetFeedChirpsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedChirps, arg.UserID, arg.CreatedAt, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFeedChirpsRow
+	for rows.Next() {
+		var i GetFeedChirpsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,

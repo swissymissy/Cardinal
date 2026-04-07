@@ -15,7 +15,15 @@
       </div>
     </div>
 
+    <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)">
+      <button class="profile-tab active" id="tabFollowing" onclick="switchTab('following')">Following</button>
+      <button class="profile-tab" id="tabDiscover" onclick="switchTab('discover')">Discover</button>
+    </div>
+
     <div id="feed"></div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn btn-outline" id="loadMoreBtn" onclick="loadMore()" style="display:none">Load more</button>
+    </div>
   </div>
 
   <script src="/js/api.js"></script>
@@ -27,32 +35,41 @@
     initNav();
 
     const MAX_CHARS = 140;
+    const LIMIT = 20;
     const chirpInput = document.getElementById("chirpInput");
 
+    let currentTab = "following";
+    let followingCursor = null;
+    let discoverCursor = null;
+
     chirpInput.addEventListener("input", () => {
-      const remaining = MAX_CHARS - chirpInput.value.length;
       const el = document.getElementById("charCount");
       el.textContent = `${chirpInput.value.length}/${MAX_CHARS}`;
-      el.style.color = remaining < 20 ? "#b91c1c" : "var(--text-muted)";
+      el.style.color = chirpInput.value.length > MAX_CHARS - 20 ? "#b91c1c" : "var(--text-muted)";
     });
 
     async function postChirp() {
       const body = chirpInput.value.trim();
-      if (!body) return;
-      if (body.length > MAX_CHARS) {
-        alert("Chirp is too long.");
-        return;
-      }
-
+      if (!body || body.length > MAX_CHARS) return;
       const res = await apiRequestAuth("/api/newchirp", "POST", { body });
-      if (!res || !res.ok) {
-        alert("Failed to post chirp.");
-        return;
-      }
-
+      if (!res || !res.ok) { alert("Failed to post chirp."); return; }
       chirpInput.value = "";
       document.getElementById("charCount").textContent = "";
-      loadFeed();
+      followingCursor = null;
+      discoverCursor = null;
+      document.getElementById("feed").innerHTML = "";
+      loadChirps();
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById("tabFollowing").classList.toggle("active", tab === "following");
+      document.getElementById("tabDiscover").classList.toggle("active", tab === "discover");
+      document.getElementById("feed").innerHTML = "";
+      document.getElementById("loadMoreBtn").style.display = "none";
+      followingCursor = null;
+      discoverCursor = null;
+      loadChirps();
     }
 
     function formatTime(isoString) {
@@ -65,49 +82,70 @@
       return date.toLocaleDateString();
     }
 
-    async function deleteChirp(id) {
-      if (!confirm("Delete this chirp?")) return;
-      const res = await apiRequestAuth(`/api/chirps/${id}`, "DELETE");
-      if (!res || !res.ok) {
-        alert("Failed to delete chirp.");
-        return;
-      }
-      loadFeed();
-    }
-
-    async function loadFeed() {
+    function renderChirps(chirps, append) {
       const feed = document.getElementById("feed");
-      feed.innerHTML = `<div class="empty-state">Loading...</div>`;
-
-      const res = await fetch("/api/getallchirps?sort=desc");
-      if (!res.ok) {
-        feed.innerHTML = `<div class="empty-state">Failed to load feed.</div>`;
-        return;
-      }
-
-      const chirps = await res.json();
       const myID = getCurrentUserID();
 
-      if (!chirps || chirps.length === 0) {
-        feed.innerHTML = `<div class="empty-state">No chirps yet. Be the first to post!</div>`;
+      if (!append && chirps.length === 0) {
+        feed.innerHTML = currentTab === "following"
+          ? `<div class="empty-state">No chirps yet. Follow some users to see their chirps here.</div>`
+          : `<div class="empty-state">No chirps yet. Be the first to post!</div>`;
         return;
       }
 
-      feed.innerHTML = chirps.map(chirp => `
+      const html = chirps.map(chirp => `
         <div class="chirp-card" id="chirp-${chirp.id}">
           <div class="chirp-card-header">
-            <a class="chirp-author" href="/profile.html?user=${chirp.user_id}">@${chirp.username || "unknown"}</a>
+            <a class="chirp-author" href="/profile.html?user=${chirp.user_id}">@${escapeHTML(chirp.username)}</a>
             <div style="display:flex;align-items:center;gap:8px">
               <span class="chirp-time">${formatTime(chirp.created_at)}</span>
               ${chirp.user_id === myID ? `<button class="btn btn-sm btn-danger" onclick="deleteChirp('${chirp.id}')">Delete</button>` : ""}
             </div>
           </div>
-          <div class="chirp-body">${chirp.body}</div>
+          <div class="chirp-body">${escapeHTML(chirp.body)}</div>
         </div>
       `).join("");
+
+      if (append) {
+        feed.insertAdjacentHTML("beforeend", html);
+      } else {
+        feed.innerHTML = html;
+      }
     }
 
-    loadFeed();
+    async function loadChirps(append = false) {
+      let chirps = [];
+
+      if (currentTab === "following") {
+        const body = followingCursor ? { before: followingCursor } : {};
+        const res = await apiRequestAuth("/api/feed", "POST", body);
+        if (!res || !res.ok) return;
+        chirps = await res.json();
+        if (chirps.length > 0) followingCursor = chirps[chirps.length - 1].created_at;
+      } else {
+        const before = discoverCursor ? `&bf=${encodeURIComponent(discoverCursor)}` : "";
+        const res = await fetch(`/api/getallchirps?sort=desc${before}`);
+        if (!res.ok) return;
+        chirps = await res.json();
+        if (chirps.length > 0) discoverCursor = chirps[chirps.length - 1].created_at;
+      }
+
+      renderChirps(chirps, append);
+      document.getElementById("loadMoreBtn").style.display = chirps.length < LIMIT ? "none" : "block";
+    }
+
+    async function loadMore() {
+      await loadChirps(true);
+    }
+
+    async function deleteChirp(id) {
+      if (!confirm("Delete this chirp?")) return;
+      const res = await apiRequestAuth(`/api/chirps/${id}`, "DELETE");
+      if (!res || !res.ok) { alert("Failed to delete chirp."); return; }
+      document.getElementById(`chirp-${id}`)?.remove();
+    }
+
+    loadChirps();
   </script>
 </body>
 </html>
