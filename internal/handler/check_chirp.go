@@ -3,13 +3,14 @@ package handler
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 // check for length and language in chirp
 func CheckChirp(msg *Chirp) error {
 
 	// check length
-	if len(msg.Body) > 500 {
+	if utf8.RuneCountInString(msg.Body) > 500 {
 		return fmt.Errorf("Chirp is too long")
 	}
 

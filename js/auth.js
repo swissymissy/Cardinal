@@ -35,11 +35,11 @@ async function logout() {
     await apiRequest("/api/revoke", "POST", null, refreshToken);
   }
   localStorage.clear();
-  window.location.href = "/login.html";
+  window.location.href = "/";
 }
 
 function requireAuth() {
   if (!getAccessToken()) {
-    window.location.href = "/login.html";
+    window.location.href = "/";
   }
 }

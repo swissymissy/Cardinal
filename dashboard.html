@@ -7,6 +7,12 @@
 </head>
 <body>
   <div class="container">
+    <div class="search-bar" style="margin-bottom:16px">
+      <input type="text" id="searchInput" placeholder="Search users by username or user ID" />
+      <button class="btn btn-primary" onclick="searchUser()">Search</button>
+    </div>
+    <div id="searchResult" style="margin-bottom:16px"></div>
+
     <div class="compose-box">
       <textarea id="chirpInput" placeholder="What's happening?"></textarea>
       <div class="compose-footer">
@@ -34,7 +40,7 @@
     requireAuth();
     initNav();
 
-    const MAX_CHARS = 140;
+    const MAX_CHARS = 500;
     const LIMIT = 20;
     const chirpInput = document.getElementById("chirpInput");
 
@@ -47,6 +53,38 @@
       el.textContent = `${chirpInput.value.length}/${MAX_CHARS}`;
       el.style.color = chirpInput.value.length > MAX_CHARS - 20 ? "#b91c1c" : "var(--text-muted)";
     });
+
+    document.getElementById("searchInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") searchUser();
+    });
+
+    async function searchUser() {
+      const query = document.getElementById("searchInput").value.trim();
+      const resultEl = document.getElementById("searchResult");
+      if (!query) { resultEl.innerHTML = ""; return; }
+
+      const res = await apiRequestAuth(`/api/users/${encodeURIComponent(query)}`, "GET");
+
+      if (!res || res.status === 404) {
+        resultEl.innerHTML = `<div class="empty-state">No user found for "<strong>${escapeHTML(query)}</strong>".</div>`;
+        return;
+      }
+      if (!res.ok) {
+        resultEl.innerHTML = `<div class="empty-state">Something went wrong. Try again.</div>`;
+        return;
+      }
+
+      const user = await res.json();
+      resultEl.innerHTML = `
+        <div class="card" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-weight:700">@${escapeHTML(user.username)}</div>
+            <div style="font-size:0.85rem;color:var(--text-muted);margin-top:2px">${user.followers_count} followers · ${user.followings_count} following</div>
+          </div>
+          <a href="/profile.html?user=${user.id}" class="btn btn-primary btn-sm">View Profile</a>
+        </div>
+      `;
+    }
 
     async function postChirp() {
       const body = chirpInput.value.trim();
@@ -103,6 +141,8 @@
             </div>
           </div>
           <div class="chirp-body">${escapeHTML(chirp.body)}</div>
+          <div class="reaction-bar" id="reactions-${chirp.id}"></div>
+          <div class="reactor-list" id="reactor-list-${chirp.id}"></div>
         </div>
       `).join("");
 
@@ -111,6 +151,76 @@
       } else {
         feed.innerHTML = html;
       }
+
+      chirps.forEach(c => loadReactions(c.id));
+    }
+
+    const REACTIONS = ['❤️', '😂', '😮', '😢', '👍'];
+
+    async function loadReactions(chirpId) {
+      const res = await apiRequestAuth(`/api/chirps/${chirpId}/react`, 'GET');
+      if (!res || !res.ok) return;
+      const data = await res.json();
+      const bar = document.getElementById(`reactions-${chirpId}`);
+      if (!bar) return;
+
+      const countMap = {};
+      (data.counts || []).forEach(c => countMap[c.type] = c.count);
+      bar.dataset.userReaction = data.user_reaction || '';
+
+      const total = data.total || 0;
+      const totalHTML = total > 0
+        ? `<span class="reaction-total" onclick="toggleReactorList('${chirpId}')">${total} reaction${total !== 1 ? 's' : ''} ›</span>`
+        : '';
+
+      bar.innerHTML = REACTIONS.map(emoji => {
+        const count = countMap[emoji] || 0;
+        const active = data.user_reaction === emoji ? ' active' : '';
+        return `<button class="reaction-btn${active}" data-chirp="${chirpId}" data-type="${emoji}" onclick="toggleReaction(this.dataset.chirp, this.dataset.type)">${emoji}${count > 0 ? ` ${count}` : ''}</button>`;
+      }).join('') + totalHTML;
+
+      const reactorList = document.getElementById(`reactor-list-${chirpId}`);
+      if (reactorList) {
+        reactorList.dataset.reactors = JSON.stringify(data.reactors || []);
+        if (reactorList.classList.contains('open')) {
+          renderReactorList(chirpId, data.reactors || []);
+        }
+      }
+    }
+
+    function renderReactorList(chirpId, reactors) {
+      const list = document.getElementById(`reactor-list-${chirpId}`);
+      if (!list) return;
+      list.innerHTML = reactors.length === 0
+        ? `<div style="color:var(--text-muted)">No reactions yet</div>`
+        : reactors.map(r =>
+            `<div class="reactor-item"><a href="/profile.html?user=${r.user_id}">@${escapeHTML(r.username)}</a> ${r.type}</div>`
+          ).join('');
+    }
+
+    function toggleReactorList(chirpId) {
+      const list = document.getElementById(`reactor-list-${chirpId}`);
+      if (!list) return;
+      if (list.classList.contains('open')) {
+        list.classList.remove('open');
+        return;
+      }
+      const reactors = JSON.parse(list.dataset.reactors || '[]');
+      renderReactorList(chirpId, reactors);
+      list.classList.add('open');
+    }
+
+    async function toggleReaction(chirpId, type) {
+      const bar = document.getElementById(`reactions-${chirpId}`);
+      const current = bar?.dataset.userReaction;
+      if (current === type) {
+        const res = await apiRequestAuth(`/api/chirps/${chirpId}/react`, 'DELETE');
+        if (!res || !res.ok) return;
+      } else {
+        const res = await apiRequestAuth(`/api/chirps/${chirpId}/react`, 'POST', { type });
+        if (!res || !res.ok) return;
+      }
+      await loadReactions(chirpId);
     }
 
     async function loadChirps(append = false) {
