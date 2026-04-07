@@ -43,7 +43,7 @@ SELECT type, COUNT(*) as count
 FROM reactions
 WHERE chirp_id = $1
 GROUP BY type 
-ORDER BY count ASC
+ORDER BY count DESC
 `
 
 type GetReactionCountsRow struct {
@@ -72,6 +72,19 @@ func (q *Queries) GetReactionCounts(ctx context.Context, chirpID uuid.UUID) ([]G
 		return nil, err
 	}
 	return items, nil
+}
+
+const getReactionTotal = `-- name: GetReactionTotal :one
+SELECT COUNT(*) AS total
+FROM reactions
+WHERE chirp_id = $1
+`
+
+func (q *Queries) GetReactionTotal(ctx context.Context, chirpID uuid.UUID) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getReactionTotal, chirpID)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
 }
 
 const getReactionsByChirpID = `-- name: GetReactionsByChirpID :many
@@ -137,9 +150,10 @@ func (q *Queries) GetUserReactions(ctx context.Context, arg GetUserReactionsPara
 	return type_, err
 }
 
-const removeReaction = `-- name: RemoveReaction :exec
+const removeReaction = `-- name: RemoveReaction :one
 DELETE FROM reactions
 WHERE chirp_id = $1 AND user_id = $2
+RETURNING chirp_id, user_id, type, created_at
 `
 
 type RemoveReactionParams struct {
@@ -147,7 +161,14 @@ type RemoveReactionParams struct {
 	UserID  uuid.UUID
 }
 
-func (q *Queries) RemoveReaction(ctx context.Context, arg RemoveReactionParams) error {
-	_, err := q.db.ExecContext(ctx, removeReaction, arg.ChirpID, arg.UserID)
-	return err
+func (q *Queries) RemoveReaction(ctx context.Context, arg RemoveReactionParams) (Reaction, error) {
+	row := q.db.QueryRowContext(ctx, removeReaction, arg.ChirpID, arg.UserID)
+	var i Reaction
+	err := row.Scan(
+		&i.ChirpID,
+		&i.UserID,
+		&i.Type,
+		&i.CreatedAt,
+	)
+	return i, err
 }

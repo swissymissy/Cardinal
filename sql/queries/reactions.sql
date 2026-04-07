@@ -5,9 +5,10 @@ ON CONFLICT (chirp_id, user_id)
 DO UPDATE SET type = EXCLUDED.type 
 RETURNING *;
 
--- name: RemoveReaction :exec
+-- name: RemoveReaction :one
 DELETE FROM reactions
-WHERE chirp_id = $1 AND user_id = $2;
+WHERE chirp_id = $1 AND user_id = $2
+RETURNING *;
 
 -- name: GetReactionsByChirpID :many
 SELECT r.chirp_id, r.user_id, r.type, r.created_at, u.username
@@ -21,7 +22,12 @@ SELECT type, COUNT(*) as count
 FROM reactions
 WHERE chirp_id = $1
 GROUP BY type 
-ORDER BY count ASC;
+ORDER BY count DESC;
+
+-- name: GetReactionTotal :one
+SELECT COUNT(*) AS total
+FROM reactions
+WHERE chirp_id = $1; 
 
 -- name: GetUserReactions :one
 SELECT type 

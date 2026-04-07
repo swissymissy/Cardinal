@@ -84,9 +84,9 @@ type Notification struct {
 type Reaction struct {
 	ChirpID   uuid.UUID `json:"chirp_id"`
 	UserID    uuid.UUID `json:"user_id"`
-	Username  string    `json:"username"`
 	Type      string    `json:"type"`
 	CreatedAt time.Time `json:"created_at"`
+	Username  string    `json:"username"`
 }
 
 type ReactionCount struct {
