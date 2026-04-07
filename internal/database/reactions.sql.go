@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -37,17 +38,56 @@ func (q *Queries) AddReaction(ctx context.Context, arg AddReactionParams) (React
 	return i, err
 }
 
-const getReactionsByChirpID = `-- name: GetReactionsByChirpID :many
-SELECT type, COUNT(*) AS count 
+const getReactionCounts = `-- name: GetReactionCounts :many
+SELECT type, COUNT(*) as count
 FROM reactions
 WHERE chirp_id = $1
 GROUP BY type 
 ORDER BY count ASC
 `
 
-type GetReactionsByChirpIDRow struct {
+type GetReactionCountsRow struct {
 	Type  string
 	Count int64
+}
+
+func (q *Queries) GetReactionCounts(ctx context.Context, chirpID uuid.UUID) ([]GetReactionCountsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getReactionCounts, chirpID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetReactionCountsRow
+	for rows.Next() {
+		var i GetReactionCountsRow
+		if err := rows.Scan(&i.Type, &i.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getReactionsByChirpID = `-- name: GetReactionsByChirpID :many
+SELECT r.chirp_id, r.user_id, r.type, r.created_at, u.username
+FROM reactions r 
+JOIN users u ON u.id = r.user_id
+WHERE r.chirp_id = $1
+ORDER BY r.created_at DESC
+`
+
+type GetReactionsByChirpIDRow struct {
+	ChirpID   uuid.UUID
+	UserID    uuid.UUID
+	Type      string
+	CreatedAt time.Time
+	Username  string
 }
 
 func (q *Queries) GetReactionsByChirpID(ctx context.Context, chirpID uuid.UUID) ([]GetReactionsByChirpIDRow, error) {
@@ -59,7 +99,13 @@ func (q *Queries) GetReactionsByChirpID(ctx context.Context, chirpID uuid.UUID) 
 	var items []GetReactionsByChirpIDRow
 	for rows.Next() {
 		var i GetReactionsByChirpIDRow
-		if err := rows.Scan(&i.Type, &i.Count); err != nil {
+		if err := rows.Scan(
+			&i.ChirpID,
+			&i.UserID,
+			&i.Type,
+			&i.CreatedAt,
+			&i.Username,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

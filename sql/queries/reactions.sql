@@ -10,7 +10,14 @@ DELETE FROM reactions
 WHERE chirp_id = $1 AND user_id = $2;
 
 -- name: GetReactionsByChirpID :many
-SELECT type, COUNT(*) AS count 
+SELECT r.chirp_id, r.user_id, r.type, r.created_at, u.username
+FROM reactions r 
+JOIN users u ON u.id = r.user_id
+WHERE r.chirp_id = $1
+ORDER BY r.created_at DESC;
+
+-- name: GetReactionCounts :many
+SELECT type, COUNT(*) as count
 FROM reactions
 WHERE chirp_id = $1
 GROUP BY type 
