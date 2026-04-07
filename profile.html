@@ -63,6 +63,11 @@
       const chirpsEl = document.getElementById("tabContent");
       chirpsEl.innerHTML = `<div class="empty-state">Loading...</div>`;
 
+      // update active tab style immediately
+      document.querySelectorAll(".profile-tab").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tab);
+      });
+
       if (tab === "chirps") {
         const res = await fetch(`/api/getallchirps?author_id=${targetID}&sort=desc`);
         const chirps = res.ok ? await res.json() : [];
@@ -104,11 +109,6 @@
           </div>
         `).join("");
       }
-
-      // update active tab style
-      document.querySelectorAll(".profile-tab").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.tab === tab);
-      });
     }
 
     async function loadProfile() {
