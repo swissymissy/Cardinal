@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/swissymissy/Cardinal/internal/database"
 )
 
 func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,10 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 	list := []CreatedChirp{}
 
 	if authorID == "" {
-		rows, err := apicfg.DB.GetAllChirps(r.Context(), before)
+		rows, err := apicfg.DB.GetAllChirps(r.Context(), database.GetAllChirpsParams{
+			CreatedAt: before,
+			Limit:     20,
+		})
 		if err != nil {
 			fmt.Printf("Error getting all chirps: %s\n", err)
 			ResponseWithError(w, http.StatusInternalServerError, "Can't get chirps. Try again")

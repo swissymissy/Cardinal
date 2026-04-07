@@ -9,7 +9,7 @@ function initNav() {
     <a href="/dashboard.html" class="nav-link">Feed</a>
     <a href="/search.html" class="nav-link">Search</a>
     <div class="nav-right">
-      <a href="/profile.html?user=${userID}" class="nav-link">@${username}</a>
+      <a href="/profile.html?user=${userID}" class="nav-link">@${escapeHTML(username)}</a>
       <div class="notif-bell-wrapper" id="notifBellWrapper">
         <button class="notif-bell" id="notifBell" title="Notifications">🔔</button>
         <span class="notif-badge" id="notifBadge" style="display:none">0</span>

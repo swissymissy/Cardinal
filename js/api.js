@@ -1,5 +1,15 @@
 const API_BASE = "";
 
+function escapeHTML(str) {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 async function apiRequest(endpoint, method, body = null, token = null) {
   const headers = {
     "Content-Type": "application/json",

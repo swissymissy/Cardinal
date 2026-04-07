@@ -58,7 +58,7 @@
         <div class="card">
           <div style="display:flex;align-items:center;justify-content:space-between">
             <div>
-              <div style="font-weight:700;font-size:1.1rem">@${user.username}</div>
+              <div style="font-weight:700;font-size:1.1rem">@${escapeHTML(user.username)}</div>
               <div style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">
                 ${user.followers_count} followers · ${user.followings_count} following
               </div>

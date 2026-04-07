@@ -42,6 +42,8 @@ func helperSubscribe[T any](
 		return fmt.Errorf("Error consuming msg from queue: %w", err)
 	}
 
+	const maxRetries = 3
+
 	// process msg in background
 	go func() {
 		defer ch.Close()
@@ -61,8 +63,39 @@ func helperSubscribe[T any](
 				fmt.Println("Ack: Message processed successfully.")
 				msg.Ack(false)
 			case NackRequeue:
-				fmt.Println("NackRequeue: Handler failed, requeueing message.")
-				msg.Nack(false, true)
+				// get current retry count from headers
+				retryCount := 0
+				if msg.Headers != nil {
+					if val, ok := msg.Headers["x-retry-count"]; ok {
+						if count, ok := val.(int32); ok {
+							retryCount = int(count)
+						}
+					}
+				}
+
+				if retryCount < maxRetries {
+					// republish with incremented retry count
+					err := ch.Publish(
+						msg.Exchange,
+						msg.RoutingKey,
+						false,
+						false,
+						amqp.Publishing{
+							ContentType: msg.ContentType,
+							Body:        msg.Body,
+							Headers: amqp.Table{
+								"x-retry-count": int32(retryCount + 1),
+							},
+						},
+					)
+					if err != nil {
+						fmt.Printf("Failed to republish for retry: %s\n", err)
+						msg.Nack(false, false)
+					} else {
+						fmt.Printf("NackRequeue: retry %d%d\n", retryCount+1, maxRetries)
+						msg.Ack(false) // ack original, new copy is in queue
+					}
+				}
 			case NackDiscard:
 				fmt.Println("NackDiscard: Handler failed, discarding message.")
 				msg.Nack(false, false)

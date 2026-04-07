@@ -76,7 +76,7 @@
               <span class="chirp-time">${formatTime(c.created_at)}</span>
               ${c.user_id === myID ? `<button class="btn btn-sm btn-danger" onclick="deleteChirp('${c.id}')">Delete</button>` : ""}
             </div>
-            <div class="chirp-body">${c.body}</div>
+            <div class="chirp-body">${escapeHTML(c.body)}</div>
           </div>
         `).join("");
       } else if (tab === "followers") {
@@ -88,7 +88,7 @@
         }
         chirpsEl.innerHTML = list.map(f => `
           <div class="user-item">
-            <a class="user-item-name" href="/profile.html?user=${f.user_id}">@${f.username}</a>
+            <a class="user-item-name" href="/profile.html?user=${f.user_id}">@${escapeHTML(f.username)}</a>
           </div>
         `).join("");
       } else if (tab === "following") {
@@ -100,7 +100,7 @@
         }
         chirpsEl.innerHTML = list.map(f => `
           <div class="user-item">
-            <a class="user-item-name" href="/profile.html?user=${f.user_id}">@${f.username}</a>
+            <a class="user-item-name" href="/profile.html?user=${f.user_id}">@${escapeHTML(f.username)}</a>
           </div>
         `).join("");
       }
@@ -128,7 +128,7 @@
         <div class="card" style="margin-bottom:20px">
           <div class="profile-header">
             <div class="profile-info">
-              <h2>@${user.username}</h2>
+              <h2>@${escapeHTML(user.username)}</h2>
               <div class="profile-meta">Joined ${formatDate(user.created_at)}</div>
               ${isMe ? `
                 <div style="margin-top:4px;font-size:0.88rem;color:var(--text-muted)">

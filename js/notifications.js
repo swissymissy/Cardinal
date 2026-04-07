@@ -38,7 +38,7 @@ function renderDropdown(notifications) {
       html += `
         <div class="notif-item ${n.is_read ? "" : "unread"}" style="cursor:pointer" onclick="goToChirp('${n.chirp_id}', '${n.notif_id}', ${n.is_read})">
           <div class="notif-item-body">
-            <div>${n.body}</div>
+            <div>${escapeHTML(n.body)}</div>
             <div class="notif-item-time">${formatTime(n.created_at)}</div>
           </div>
           ${!n.is_read ? `<button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); markOneRead('${n.notif_id}')">✓</button>` : ""}
