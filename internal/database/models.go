@@ -19,6 +19,15 @@ type Chirp struct {
 	UserID    uuid.UUID
 }
 
+type Comment struct {
+	ID        uuid.UUID
+	ChirpID   uuid.UUID
+	UserID    uuid.UUID
+	Body      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type EmailVerificationToken struct {
 	Token     uuid.UUID
 	UserID    uuid.UUID
