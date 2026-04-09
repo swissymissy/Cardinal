@@ -120,6 +120,6 @@ func (apicfg *ApiConfig) HandlerCreateComment(w http.ResponseWriter, r *http.Req
 			fmt.Printf("Failed to publish comment notification to exchange: %s\n", err)
 			return
 		}
-		fmt.Printf("Notification is published for new comment: %s\n", err)
+		fmt.Printf("Notification is published for new comment: %s\n", comment.ID)
 	}
 }
