@@ -108,8 +108,8 @@ func (apicfg *ApiConfig) HandlerAddReaction(w http.ResponseWriter, r *http.Reque
 		}
 		defer ch.Close()
 
-		// publish to exchange "direct_notification"
-		err = pubsub.PublishJSON(r.Context(), ch, "direct_notification", "", pubsub.DirectEvent{
+		// publish to exchange "direct_notifications"
+		err = pubsub.PublishJSON(r.Context(), ch, "direct_notifications", "", pubsub.DirectEvent{
 			Type:      "reaction",
 			Body:      fmt.Sprintf("%s reacted %s to your chirp.", user.Username, react.Type),
 			Triggerer: userID,

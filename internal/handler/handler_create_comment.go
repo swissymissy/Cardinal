@@ -107,8 +107,8 @@ func (apicfg *ApiConfig) HandlerCreateComment(w http.ResponseWriter, r *http.Req
 		}
 		defer ch.Close()
 
-		// publish to exchange "direct_notification"
-		err = pubsub.PublishJSON(r.Context(), ch, "direct_notification", "", pubsub.DirectEvent{
+		// publish to exchange "direct_notifications"
+		err = pubsub.PublishJSON(r.Context(), ch, "direct_notifications", "", pubsub.DirectEvent{
 			Type:      "comment",
 			Body:      comment.Body,
 			Triggerer: userID,
