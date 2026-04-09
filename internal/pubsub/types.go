@@ -44,3 +44,13 @@ const (
 	NackRequeue
 	NackDiscard
 )
+
+// for comment-reaction-follow notifications
+type DirectEvent struct {
+	Type      string     `json:"type"` //"comment", "reaction", "follow"
+	Body      string     `json:"body"`
+	Triggerer uuid.UUID  `json:"triggerer"`
+	Username  string     `json:"username"`
+	Receiver  uuid.UUID  `json:"receiver"`
+	ChirpID   *uuid.UUID `json:"chirp_id"` // nil for follow
+}

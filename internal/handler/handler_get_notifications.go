@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"
 )
 
@@ -32,13 +33,17 @@ func (apicfg *ApiConfig) HandlerGetNotifications(w http.ResponseWriter, r *http.
 	}
 	notiList := []Notification{}
 	for _, noti := range notifications {
+		var chirpID *uuid.UUID
+		if noti.ChirpID.Valid { // check if chirpID is not null
+			chirpID = &noti.ChirpID.UUID
+		}
 		notiList = append(notiList, Notification{
 			ID:        noti.ID,
 			CreatedAt: noti.CreatedAt,
 			Body:      noti.Body,
 			Receiver:  noti.Receiver,
 			Username:  noti.Username,
-			ChirpID:   noti.ChirpID,
+			ChirpID:   chirpID,
 			IsRead:    noti.IsRead,
 		})
 	}

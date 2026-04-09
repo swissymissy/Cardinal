@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
+	"github.com/swissymissy/Cardinal/internal/pubsub"
 )
 
 func (apicfg *ApiConfig) HandlerCreateComment(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +56,7 @@ func (apicfg *ApiConfig) HandlerCreateComment(w http.ResponseWriter, r *http.Req
 	}
 
 	// check chirp existence
-	_, err = apicfg.DB.GetOneChirp(r.Context(), chirpID)
+	chirp, err := apicfg.DB.GetOneChirp(r.Context(), chirpID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ResponseWithError(w, 404, "Chirp not found")
@@ -94,4 +95,31 @@ func (apicfg *ApiConfig) HandlerCreateComment(w http.ResponseWriter, r *http.Req
 		CreatedAt: comment.CreatedAt,
 		UpdatedAt: comment.UpdatedAt,
 	})
+
+	// publish notification to rabbit after comment
+	// only notify when commenter not the chirp author
+	if userID != chirp.UserID {
+		// open channel from connection
+		ch, err := apicfg.MQConn.Channel()
+		if err != nil {
+			fmt.Printf("Failed to open MQ channel: %s\n", err)
+			return
+		}
+		defer ch.Close()
+
+		// publish to exchange "direct_notifications"
+		err = pubsub.PublishJSON(r.Context(), ch, "direct_notifications", "", pubsub.DirectEvent{
+			Type:      "comment",
+			Body:      comment.Body,
+			Triggerer: userID,
+			Username:  user.Username,
+			Receiver:  chirp.UserID,
+			ChirpID:   &chirpID,
+		})
+		if err != nil {
+			fmt.Printf("Failed to publish comment notification to exchange: %s\n", err)
+			return
+		}
+		fmt.Printf("Notification is published for new comment: %s\n", comment.ID)
+	}
 }

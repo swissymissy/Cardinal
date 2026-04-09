@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
+	"github.com/swissymissy/Cardinal/internal/pubsub"
 )
 
 type ReactionRequest struct {
@@ -88,4 +89,38 @@ func (apicfg *ApiConfig) HandlerAddReaction(w http.ResponseWriter, r *http.Reque
 		CreatedAt: react.CreatedAt,
 		Username:  user.Username,
 	})
+
+	// fetch for chirp's author ID
+	chirp, err := apicfg.DB.GetOneChirp(r.Context(), chirpID)
+	if err != nil {
+		fmt.Printf("Failed to fetch chirp for notification: %s\n", err)
+		return
+	}
+
+	// publish notification to rabbit
+	// only notify if reactor is not chirp author
+	if userID != chirp.UserID {
+		// open channel
+		ch, err := apicfg.MQConn.Channel()
+		if err != nil {
+			fmt.Printf("Failed to open MQ channel: %s\n", err)
+			return
+		}
+		defer ch.Close()
+
+		// publish to exchange "direct_notifications"
+		err = pubsub.PublishJSON(r.Context(), ch, "direct_notifications", "", pubsub.DirectEvent{
+			Type:      "reaction",
+			Body:      fmt.Sprintf("%s reacted %s to your chirp.", user.Username, react.Type),
+			Triggerer: userID,
+			Username:  user.Username,
+			Receiver:  chirp.UserID,
+			ChirpID:   &chirpID,
+		})
+		if err != nil {
+			fmt.Printf("Failed to publish reaction notification to exchange: %s\n", err)
+			return
+		}
+		fmt.Printf("Reaction notification is published: %s\n", react.ChirpID)
+	}
 }

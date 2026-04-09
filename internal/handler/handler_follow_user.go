@@ -8,6 +8,7 @@ import (
 
 	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
+	"github.com/swissymissy/Cardinal/internal/pubsub"
 )
 
 func (apicfg *ApiConfig) HandlerFollowUser(w http.ResponseWriter, r *http.Request) {
@@ -57,4 +58,34 @@ func (apicfg *ApiConfig) HandlerFollowUser(w http.ResponseWriter, r *http.Reques
 		CreatedAt:  newFollowing.CreatedAt,
 		UpdatedAt:  newFollowing.UpdatedAt,
 	})
+
+	// fetch follower's username
+	follower, err := apicfg.DB.GetUserByID(r.Context(), followerID)
+	if err != nil {
+		fmt.Printf("Failed to fetch follower by ID; %s\n", err)
+		return
+	}
+
+	// publish to rabbit
+	// open a channel from connection
+	ch, err := apicfg.MQConn.Channel()
+	if err != nil {
+		fmt.Printf("Failed to open MQ channel: %s\n", err)
+		return
+	}
+	defer ch.Close()
+
+	err = pubsub.PublishJSON(r.Context(), ch, "direct_notifications", "", pubsub.DirectEvent{
+		Type:      "follow",
+		Body:      fmt.Sprintf("%s started following you.", follower.Username),
+		Triggerer: followerID,
+		Username:  follower.Username,
+		Receiver:  followeeID,
+		ChirpID:   nil,
+	})
+	if err != nil {
+		fmt.Printf("Failed to publish follow notification: %s\n", err)
+		return
+	}
+	fmt.Printf("Follow notification for user %s is published", followerID)
 }

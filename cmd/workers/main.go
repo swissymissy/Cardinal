@@ -86,6 +86,36 @@ func main() {
 		return
 	}
 
+	// subscribe to "direct_push" for in-app push notification
+	err = pubsub.SubscribeJSON(
+		conn,
+		"direct_notifications",
+		"direct_push",
+		"",
+		pubsub.Durable,
+		pubsub.ExchangeFanout,
+		wkrcfg.HandlerDirectPush,
+	)
+	if err != nil {
+		fmt.Printf("Failed to subscribe to direct_push queue: %s\n", err)
+		return
+	}
+
+	// subscribe to "direct_email" for email notification
+	err = pubsub.SubscribeJSON(
+		conn,
+		"direct_notifications",
+		"direct_email",
+		"",
+		pubsub.Durable,
+		pubsub.ExchangeFanout,
+		wkrcfg.HandlerDirectEmail,
+	)
+	if err != nil {
+		fmt.Printf("Failed to subscribe to direct_email queue: %s\n", err)
+		return
+	}
+
 	// wait for signal ctrl+c
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
