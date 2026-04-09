@@ -13,6 +13,33 @@ import (
 	"github.com/lib/pq"
 )
 
+const createFollowNotification = `-- name: CreateFollowNotification :one
+INSERT INTO notifications (created_at, body, receiver, triggerer)
+VALUES (NOW(), $1, $2, $3)
+RETURNING id, created_at, body, receiver, triggerer, chirp_id, is_read
+`
+
+type CreateFollowNotificationParams struct {
+	Body      string
+	Receiver  uuid.UUID
+	Triggerer uuid.UUID
+}
+
+func (q *Queries) CreateFollowNotification(ctx context.Context, arg CreateFollowNotificationParams) (Notification, error) {
+	row := q.db.QueryRowContext(ctx, createFollowNotification, arg.Body, arg.Receiver, arg.Triggerer)
+	var i Notification
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Body,
+		&i.Receiver,
+		&i.Triggerer,
+		&i.ChirpID,
+		&i.IsRead,
+	)
+	return i, err
+}
+
 const createNotifications = `-- name: CreateNotifications :one
 INSERT INTO notifications (created_at, body, receiver, triggerer, chirp_id)
 VALUES (
@@ -26,7 +53,7 @@ type CreateNotificationsParams struct {
 	Body      string
 	Receiver  uuid.UUID
 	Triggerer uuid.UUID
-	ChirpID   uuid.UUID
+	ChirpID   uuid.NullUUID
 }
 
 func (q *Queries) CreateNotifications(ctx context.Context, arg CreateNotificationsParams) (Notification, error) {
@@ -58,7 +85,7 @@ type CreateNotificationsBulkParams struct {
 	Body      string
 	Column2   []uuid.UUID
 	Triggerer uuid.UUID
-	ChirpID   uuid.UUID
+	ChirpID   uuid.NullUUID
 }
 
 func (q *Queries) CreateNotificationsBulk(ctx context.Context, arg CreateNotificationsBulkParams) error {
@@ -85,7 +112,7 @@ type GetNotificationByReceiverRow struct {
 	Body      string
 	Receiver  uuid.UUID
 	Triggerer uuid.UUID
-	ChirpID   uuid.UUID
+	ChirpID   uuid.NullUUID
 	IsRead    bool
 	Username  string
 }

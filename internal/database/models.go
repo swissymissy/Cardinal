@@ -48,7 +48,7 @@ type Notification struct {
 	Body      string
 	Receiver  uuid.UUID
 	Triggerer uuid.UUID
-	ChirpID   uuid.UUID
+	ChirpID   uuid.NullUUID
 	IsRead    bool
 }
 

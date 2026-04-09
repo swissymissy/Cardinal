@@ -72,13 +72,13 @@ type FollowList struct {
 }
 
 type Notification struct {
-	ID        uuid.UUID `json:"notif_id"`
-	CreatedAt time.Time `json:"created_at"`
-	Body      string    `json:"body"`
-	Receiver  uuid.UUID `json:"receiver"`
-	Username  string    `json:"author"`
-	ChirpID   uuid.UUID `json:"chirp_id"`
-	IsRead    bool      `json:"is_read"`
+	ID        uuid.UUID  `json:"notif_id"`
+	CreatedAt time.Time  `json:"created_at"`
+	Body      string     `json:"body"`
+	Receiver  uuid.UUID  `json:"receiver"`
+	Username  string     `json:"author"`
+	ChirpID   *uuid.UUID `json:"chirp_id"`
+	IsRead    bool       `json:"is_read"`
 }
 
 type Reaction struct {
