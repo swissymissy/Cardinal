@@ -26,3 +26,4 @@ RETURNING *;
 SELECT COUNT(*) AS count 
 FROM comments
 WHERE chirp_id = $1;
+

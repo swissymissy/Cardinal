@@ -37,7 +37,7 @@ type UserProfile struct {
 	FollowingCount int64     `json:"followings_count"`
 }
 
-type Chirp struct {
+type Body struct {
 	Body string `json:"body"`
 }
 
@@ -99,4 +99,19 @@ type ReactionSummary struct {
 	Reactors     []Reaction      `json:"reactors"`
 	UserReaction string          `json:"user_reaction"`
 	Total        int64           `json:"total"`
+}
+
+type Comment struct {
+	ID        uuid.UUID `json:"id"`
+	ChirpID   uuid.UUID `json:"chirp_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	Username  string    `json:"username"`
+	Body      string    `json:"body"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type CommentSummary struct {
+	Total    int64     `json:"total"`
+	Comments []Comment `json:"comments"`
 }

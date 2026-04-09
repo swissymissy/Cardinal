@@ -47,7 +47,7 @@ func (apicfg *ApiConfig) HandlerFollowUser(w http.ResponseWriter, r *http.Reques
 			return
 		}
 		fmt.Printf("Error creating new follower: %s\n", err)
-		ResponseWithError(w, 500, "Failed to follow. Try again.")
+		ResponseWithError(w, 500, "Failed to follow")
 		return
 	}
 

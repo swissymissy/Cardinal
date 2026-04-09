@@ -16,7 +16,7 @@ func (apicfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Reques
 	err := DecodeRequest(r, &newUser)
 	if err != nil {
 		fmt.Printf("Error decoding request: %s\n", err)
-		ResponseWithError(w, 500, "Can't create new user")
+		ResponseWithError(w, 400, "Invalid request")
 		return
 	}
 	userEmail := newUser.Email
