@@ -8,6 +8,7 @@ import (
 
 	"github.com/swissymissy/Cardinal/internal/auth"
 	"github.com/swissymissy/Cardinal/internal/database"
+	"github.com/swissymissy/Cardinal/internal/pubsub"
 )
 
 func (apicfg *ApiConfig) HandlerFollowUser(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +68,7 @@ func (apicfg *ApiConfig) HandlerFollowUser(w http.ResponseWriter, r *http.Reques
 
 	// publish to rabbit
 	// open a channel from connection
-	ch, err := apicfg.MQConn.Channle()
+	ch, err := apicfg.MQConn.Channel()
 	if err != nil {
 		fmt.Printf("Failed to open MQ channel: %s\n", err)
 		return

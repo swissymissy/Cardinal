@@ -56,7 +56,7 @@ func (apicfg *ApiConfig) HandlerCreateComment(w http.ResponseWriter, r *http.Req
 	}
 
 	// check chirp existence
-	chirp, err = apicfg.DB.GetOneChirp(r.Context(), chirpID)
+	chirp, err := apicfg.DB.GetOneChirp(r.Context(), chirpID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ResponseWithError(w, 404, "Chirp not found")

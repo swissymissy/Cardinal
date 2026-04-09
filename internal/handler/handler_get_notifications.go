@@ -34,7 +34,7 @@ func (apicfg *ApiConfig) HandlerGetNotifications(w http.ResponseWriter, r *http.
 	notiList := []Notification{}
 	for _, noti := range notifications {
 		var chirpID *uuid.UUID
-		if noti.chirpID.Valid { // check if chirpID is not null
+		if noti.ChirpID.Valid { // check if chirpID is not null
 			chirpID = &noti.ChirpID.UUID
 		}
 		notiList = append(notiList, Notification{

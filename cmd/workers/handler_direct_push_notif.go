@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/database"
 	"github.com/swissymissy/Cardinal/internal/pubsub"
 )
@@ -15,7 +16,7 @@ func (wkrcfg *WorkerConfig) HandlerDirectPush(event pubsub.DirectEvent) pubsub.A
 			Body:      event.Body,
 			Receiver:  event.Receiver,
 			Triggerer: event.Triggerer,
-			ChirpID:   event.ChirpID,
+			ChirpID:   uuid.NullUUID{UUID: *event.ChirpID, Valid: true},
 		})
 		if err != nil {
 			fmt.Printf("Failed to save new react-comment notification to db: %s\n", err)

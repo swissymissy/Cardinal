@@ -50,7 +50,7 @@ func (wkrcfg *WorkerConfig) saveNotifications(ctx context.Context, event pubsub.
 		Body:      msg,
 		Column2:   idList,
 		Triggerer: event.Triggerer,
-		ChirpID:   event.ChirpID,
+		ChirpID:   uuid.NullUUID{UUID: event.ChirpID, Valid: true},
 	})
 	if err != nil {
 		return fmt.Errorf("Errors writing new notification to notifications table: %w", err)
