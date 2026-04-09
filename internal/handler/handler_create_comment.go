@@ -3,6 +3,8 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"errors"
+	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"
@@ -48,14 +50,19 @@ func (apicfg *ApiConfig) HandlerCreateComment(w http.ResponseWriter, r *http.Req
 	err = CheckChirp(&commentReq)
 	if err != nil {
 		fmt.Printf("%s\n", err)
-		ResponseWithError(w, 400, "Comment is too long")
+		ResponseWithError(w, 400, err.Error())
 		return
 	}
 
 	// check chirp existence
 	_, err = apicfg.DB.GetOneChirp(r.Context(), chirpID)
 	if err != nil {
-		ResponseWithError(w, 404, "Chirp not found")
+		if errors.Is(err, sql.ErrNoRows) {
+			ResponseWithError(w, 404, "Chirp not found")
+			return
+		}
+		fmt.Printf("Error fetching chirp: %s\n", err)
+		ResponseWithError(w, 500, "Something went wrong")
 		return
 	}
 

@@ -91,38 +91,6 @@ func (q *Queries) EditComment(ctx context.Context, arg EditCommentParams) (Comme
 	return i, err
 }
 
-const getCommentByID = `-- name: GetCommentByID :one
-SELECT c.id, c.chirp_id, c.user_id, c.body, c.created_at, c.updated_at, u.username
-FROM comments c
-JOIN users u ON u.id = c.user_id
-WHERE c.id = $1
-`
-
-type GetCommentByIDRow struct {
-	ID        uuid.UUID
-	ChirpID   uuid.UUID
-	UserID    uuid.UUID
-	Body      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Username  string
-}
-
-func (q *Queries) GetCommentByID(ctx context.Context, id uuid.UUID) (GetCommentByIDRow, error) {
-	row := q.db.QueryRowContext(ctx, getCommentByID, id)
-	var i GetCommentByIDRow
-	err := row.Scan(
-		&i.ID,
-		&i.ChirpID,
-		&i.UserID,
-		&i.Body,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Username,
-	)
-	return i, err
-}
-
 const getCommentCount = `-- name: GetCommentCount :one
 SELECT COUNT(*) AS count 
 FROM comments

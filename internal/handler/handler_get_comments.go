@@ -3,6 +3,8 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"errors"
+	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"
@@ -37,10 +39,15 @@ func (apicfg *ApiConfig) HandlerGetComments(w http.ResponseWriter, r *http.Reque
 	// check chirp existence
 	_, err = apicfg.DB.GetOneChirp(r.Context(), chirpID)
 	if err != nil {
-		ResponseWithError(w, 404, "Chirp not found")
+		if errors.Is(err, sql.ErrNoRows) {
+			ResponseWithError(w, 404, "Chirp not found")
+			return
+		}
+		fmt.Printf("Error fetching chirp: %s\n", err)
+		ResponseWithError(w, 500, "Something went wrong")
 		return
 	}
-	
+
 	// get comments from db
 	commentList, err := apicfg.DB.GetCommentsByChirpID(r.Context(), chirpID)
 	if err != nil {
