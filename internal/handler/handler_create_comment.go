@@ -110,7 +110,7 @@ func (apicfg *ApiConfig) HandlerCreateComment(w http.ResponseWriter, r *http.Req
 		// publish to exchange "direct_notifications"
 		err = pubsub.PublishJSON(r.Context(), ch, "direct_notifications", "", pubsub.DirectEvent{
 			Type:      "comment",
-			Body:      comment.Body,
+			Body:      fmt.Sprintf("%s commented on your chirp: \n\n%s", user.Username, comment.Body),
 			Triggerer: userID,
 			Username:  user.Username,
 			Receiver:  chirp.UserID,

@@ -95,7 +95,7 @@ func (apicfg *ApiConfig) HandlerGetReactions(w http.ResponseWriter, r *http.Requ
 
 	// check errors after all goroutines finishes
 	if results.reactorsErr != nil {
-		fmt.Printf("Error geting reactors: %s\n", results.reactorsErr)
+		fmt.Printf("Error getting reactors: %s\n", results.reactorsErr)
 		ResponseWithError(w, 500, "Failed to get reactions")
 		return
 	}

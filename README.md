@@ -146,6 +146,7 @@ Cardinal is a simple social media platform that lets users share their thoughts,
 |---|---|---|
 | `POST` | `/admin/reset` | Reset all users (dev only) |
 
+
 ---
 
 ## Tech Stack

@@ -21,7 +21,7 @@ func (wkrcfg *WorkerConfig) HandlerDirectEmail(event pubsub.DirectEvent) pubsub.
 	switch event.Type {
 	case "comment":
 		subject = fmt.Sprintf("Cardinal: %s commented on your chirp", event.Username)
-		body = fmt.Sprintf("User %s commented on your chirp: \n\n%s", event.Username, event.Body)
+		body = event.Body
 	case "reaction":
 		subject = fmt.Sprintf("Cardinal: %s reacted to your chirp", event.Username)
 		body = event.Body

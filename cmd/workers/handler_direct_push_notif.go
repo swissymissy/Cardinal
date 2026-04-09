@@ -12,6 +12,7 @@ import (
 func (wkrcfg *WorkerConfig) HandlerDirectPush(event pubsub.DirectEvent) pubsub.AckType {
 	// check follow or react-comment
 	if event.ChirpID != nil {
+		// react or comment
 		_, err := wkrcfg.DB.CreateNotifications(context.Background(), database.CreateNotificationsParams{
 			Body:      event.Body,
 			Receiver:  event.Receiver,
@@ -23,6 +24,7 @@ func (wkrcfg *WorkerConfig) HandlerDirectPush(event pubsub.DirectEvent) pubsub.A
 			return pubsub.NackRequeue
 		}
 	} else {
+		// follow
 		_, err := wkrcfg.DB.CreateFollowNotification(context.Background(), database.CreateFollowNotificationParams{
 			Body:      event.Body,
 			Receiver:  event.Receiver,
