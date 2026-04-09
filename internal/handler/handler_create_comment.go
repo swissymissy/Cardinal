@@ -109,12 +109,12 @@ func (apicfg *ApiConfig) HandlerCreateComment(w http.ResponseWriter, r *http.Req
 
 		// publish to exchange "direct_notification"
 		err = pubsub.PublishJSON(r.Context(), ch, "direct_notification", "", pubsub.DirectEvent{
-			Type: "comment",
-			Body: fmt.Sprintf("%s commented on your chirp.", user.Username)
+			Type:      "comment",
+			Body:      fmt.Sprintf("%s commented on your chirp.", user.Username),
 			Triggerer: userID,
-			Username: user.Username,
-			Receiver: chirp.UserID,
-			ChirpID: &chirpID,
+			Username:  user.Username,
+			Receiver:  chirp.UserID,
+			ChirpID:   &chirpID,
 		})
 		if err != nil {
 			fmt.Printf("Failed to publish comment notification to exchange: %s\n", err)

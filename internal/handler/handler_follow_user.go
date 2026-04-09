@@ -75,12 +75,12 @@ func (apicfg *ApiConfig) HandlerFollowUser(w http.ResponseWriter, r *http.Reques
 	defer ch.Close()
 
 	err = pubsub.PublishJSON(r.Context(), ch, "direct_notification", "", pubsub.DirectEvent{
-		Type: "follow",
-		Body: fmt.Sprintf("%s started following you.", follower.Username),
+		Type:      "follow",
+		Body:      fmt.Sprintf("%s started following you.", follower.Username),
 		Triggerer: followerID,
-		Username: follower.Username,
-		Receiver: followeeID,
-		ChirpID: nil,
+		Username:  follower.Username,
+		Receiver:  followeeID,
+		ChirpID:   nil,
 	})
 	if err != nil {
 		fmt.Printf("Failed to publish follow notification: %s\n", err)

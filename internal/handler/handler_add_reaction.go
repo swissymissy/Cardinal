@@ -91,7 +91,7 @@ func (apicfg *ApiConfig) HandlerAddReaction(w http.ResponseWriter, r *http.Reque
 	})
 
 	// fetch for chirp's author ID
-	chirp, err :=  apicfg.DB.GetOneChirp(r.Context(), chirpID)
+	chirp, err := apicfg.DB.GetOneChirp(r.Context(), chirpID)
 	if err != nil {
 		fmt.Printf("Failed to fetch chirp for notification: %s\n", err)
 		return
@@ -101,7 +101,7 @@ func (apicfg *ApiConfig) HandlerAddReaction(w http.ResponseWriter, r *http.Reque
 	// only notify if reactor is not chirp author
 	if userID != chirp.UserID {
 		// open channel
-		ch, err :=  apicfg.MQConn.Channel()
+		ch, err := apicfg.MQConn.Channel()
 		if err != nil {
 			fmt.Printf("Failed to open MQ channel: %s\n", err)
 			return
@@ -110,17 +110,17 @@ func (apicfg *ApiConfig) HandlerAddReaction(w http.ResponseWriter, r *http.Reque
 
 		// publish to exchange "direct_notification"
 		err = pubsub.PublishJSON(r.Context(), ch, "direct_notification", "", pubsub.DirectEvent{
-			Type: "reaction",
-			Body: fmt.Sprintf("%s reacted %s to your chirp.", user.Username, react.Type)
+			Type:      "reaction",
+			Body:      fmt.Sprintf("%s reacted %s to your chirp.", user.Username, react.Type),
 			Triggerer: userID,
-			Username: user.Username,
-			Receiver: chirp.UserID,
-			ChirpID: &chirpID,
+			Username:  user.Username,
+			Receiver:  chirp.UserID,
+			ChirpID:   &chirpID,
 		})
 		if err != nil {
 			fmt.Printf("Failed to publish reaction notification to exchange: %s\n", err)
 			return
 		}
 		fmt.Printf("Reaction notification is published: %s\n", react.ChirpID)
-	} 
+	}
 }
