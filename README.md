@@ -1,145 +1,151 @@
 # Cardinal
 
-Cardinal is a simple social media platform that lets you express your thoughts, follow people you like, react, comment, and stay in the loop.
+Cardinal is a simple social media platform that lets users share their thoughts, react to posts, comment, follow others, and stay connected.
 
----
-
-## Features
-
-### Users
-- Create a new account and log in
-- Email verification on sign-up
-- Search for users by username or user ID
-
-### Posts (Chirps)
-- Create and delete posts
-- React to posts with emojis (❤️ 😂 😮 😢 👍)
-- Comment on posts
-- Pagination — chirps are loaded in batches, with a "load more" option
-
-### Social
-- Follow and unfollow users
-- In-app notifications when someone you follow posts a new chirp
-- Email notifications delivered via SMTP
-
-### Security
-- Passwords hashed with **Argon2id**
-- Authentication via **JWT** — short-lived access tokens and long-lived refresh tokens
-- Token revocation on logout
+**Motivation:** Inspired by the Chirpy project from Boot.dev, Cardinal expands on that foundation with more features to get closer to a real social media platform like Twitter.
 
 ---
 
 ## Prerequisites
 
-Make sure the following are installed before setting up Cardinal:
-
-- **Go** (1.21+) — [https://go.dev/doc/install](https://go.dev/doc/install)
-- **PostgreSQL** — [https://www.postgresql.org/download/](https://www.postgresql.org/download/)
-- **Docker** — [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/) (used to run RabbitMQ locally)
-- **Goose** — database migration tool
-
-  ```bash
-  go install github.com/pressly/goose/v3/cmd/goose@latest
-  ```
+- [Go](https://go.dev/doc/install)
+- [PostgreSQL](https://www.postgresql.org/download/)
+- [Docker](https://www.docker.com/get-started/) (for RabbitMQ)
+- [Goose](https://github.com/pressly/goose) — database migration tool
 
 ---
 
-## Setup (Draft version before Docker-compose)
+## Setup
 
-### 1. Clone the repository
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/swissymissy/Cardinal.git
+   cd Cardinal
+   ```
 
-```bash
-git clone https://github.com/swissymissy/Cardinal
-cd Cardinal
-```
+2. **Download dependencies**
+   ```bash
+   go mod tidy
+   ```
 
-### 2. Install dependencies
+3. **Configure environment**
 
-```bash
-go mod download
-```
+   Copy `.env.example` to `.env` and fill in the values:
+   ```bash
+   cp .env.example .env
+   ```
 
-### 3. Start RabbitMQ with Docker
+   Generate a JWT secret:
+   ```bash
+   openssl rand -base64 64
+   ```
 
-```bash
-docker run -d --name rabbitmq -p 5672:5672 rabbitmq:3
-```
+4. **Start RabbitMQ**
+   ```bash
+   docker run -d --name rabbitmq -p 5672:5672 rabbitmq:3
+   ```
 
-To verify it's running:
+5. **Run database migrations**
+   ```bash
+   goose -dir sql/schema postgres "YOUR_DB_URL" up
+   ```
 
-```bash
-docker ps
-```
+6. **Run the server**
+   ```bash
+   go run .
+   ```
 
-### 4. Create the PostgreSQL database
+---
 
-```bash
-createdb cardinal
-```
+## Features
 
-If `createdb` is not available, you can use `psql` instead:
-
-```sql
-psql -U postgres -c "CREATE DATABASE cardinal;"
-```
-
-### 5. Configure environment variables
-
-Copy the example file and fill in your values:
-
-```bash
-cp .env.example .env
-```
-
-| Variable | Description |
+| Feature | Description |
 |---|---|
-| `PORT` | Port the server listens on (e.g. `8080`) |
-| `PLATFORM` | Set to `dev` for local development |
-| `DB_URL` | PostgreSQL connection string (see format below) |
-| `RABBITMQ_URL` | RabbitMQ connection string (default: `amqp://guest:guest@localhost:5672/`) |
-| `JWT_SECRET` | Secret key for signing JWT tokens (see generation below) |
-| `BASE_URL` | Base URL of the server — used in email verification links (e.g. `http://localhost:8080`) |
-| `SMTP_HOST` | SMTP server host (e.g. `smtp.gmail.com`) |
-| `SMTP_PORT` | SMTP server port (e.g. `587`) |
-| `SMTP_USERNAME` | Your sender email address |
-| `SMTP_PASSWORD` | SMTP app password (see Gmail note below) |
+| Users | Register and log in to your account |
+| Security | Passwords hashed with Argon2id, sessions managed with JWT access + refresh tokens |
+| Chirps | Post, view, and delete short messages (up to 500 characters) |
+| Comments | Comment on any chirp |
+| Reactions | React to chirps with emoji |
+| Follow | Follow other users to build your feed |
+| Notifications | In-app and email notifications for new chirps from followed users |
+| Email Verification | Verify your email address on sign-up |
 
-**DB_URL format:**
-```
-postgres://username:password@localhost:5432/cardinal?sslmode=disable
-```
+---
 
-**Generate a JWT secret:**
-```bash
-openssl rand -base64 64
-```
-Paste the output as the value of `JWT_SECRET` in your `.env`.
+## API Reference
 
-**Gmail SMTP setup:**
-Gmail requires an App Password rather than your account password. To generate one:
-1. Enable 2-Step Verification on your Google account
-2. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-3. Create a new app password and paste it as `SMTP_PASSWORD`
+### Auth
 
-### 6. Run database migrations
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/newuser` | Register a new user |
+| `POST` | `/api/userlogin` | Log in and receive tokens |
+| `POST` | `/api/refresh` | Refresh an access token |
+| `POST` | `/api/revoke` | Revoke a refresh token (logout) |
 
-```bash
-goose -dir sql/schema postgres "your-db-url-here" up
-```
+### Users
 
-Or if you have `DB_URL` set in your `.env`:
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/users/{identifier}` | Get a user by username or ID |
+| `GET` | `/api/users/{userID}/followers` | List a user's followers |
+| `GET` | `/api/users/{userID}/followings` | List who a user follows |
 
-```bash
-export $(cat .env | xargs) && goose -dir sql/schema postgres "$DB_URL" up
-```
+### Follow
 
-### 7. Start the server
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/newfollow` | Follow a user |
+| `DELETE` | `/api/unfollow` | Unfollow a user |
 
-```bash
-go run .
-```
+### Chirps
 
-The app will be available at [http://localhost:8080](http://localhost:8080).
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/newchirp` | Create a new chirp |
+| `GET` | `/api/getallchirps` | Get all chirps |
+| `POST` | `/api/feed` | Get chirps from followed users |
+| `GET` | `/api/chirps/{chirpID}` | Get a single chirp |
+| `DELETE` | `/api/chirps/{chirpID}` | Delete a chirp (owner only) |
+
+### Reactions
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/chirps/{chirpID}/react` | Add a reaction to a chirp |
+| `DELETE` | `/api/chirps/{chirpID}/react` | Remove your reaction from a chirp |
+| `GET` | `/api/chirps/{chirpID}/react` | Get all reactions for a chirp |
+
+### Comments
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/chirps/{chirpID}/comments` | Add a comment to a chirp |
+| `GET` | `/api/chirps/{chirpID}/comments` | Get all comments on a chirp |
+| `PUT` | `/api/comments/{commentID}` | Edit a comment (owner only) |
+| `DELETE` | `/api/comments/{commentID}` | Delete a comment (owner only) |
+
+### Notifications
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/notifications` | Get your notifications |
+| `PUT` | `/api/notifications` | Mark all notifications as read |
+| `PUT` | `/api/notifications/{notifID}` | Mark a single notification as read |
+
+### Email Verification
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/verify/request` | Request a verification email |
+| `GET` | `/api/verify` | Verify email via token link |
+
+### Admin
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/admin/reset` | Reset all users (dev only) |
+
 
 ---
 
@@ -147,12 +153,10 @@ The app will be available at [http://localhost:8080](http://localhost:8080).
 
 | Layer | Technology |
 |---|---|
-| Backend | Go |
+| Language | Go |
 | Database | PostgreSQL |
-| Query generation | sqlc |
+| Queries | sqlc |
 | Migrations | Goose |
-| Auth | JWT (golang-jwt) |
-| Password hashing | Argon2id (alexedwards/argon2id) |
-| Message queue | RabbitMQ (amqp091-go) |
-| Email | go-mail |
-| Frontend | Vanilla HTML, CSS, JavaScript |
+| Messaging | RabbitMQ (AMQP) |
+| Auth | JWT + Argon2id |
+| Frontend | Vanilla JS / HTML / CSS |

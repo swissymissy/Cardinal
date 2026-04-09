@@ -107,6 +107,10 @@ func main() {
 	mux.HandleFunc("POST /api/chirps/{chirpID}/react", apicfg.HandlerAddReaction)
 	mux.HandleFunc("DELETE /api/chirps/{chirpID}/react", apicfg.HandlerRemoveReaction)
 	mux.HandleFunc("GET /api/chirps/{chirpID}/react", apicfg.HandlerGetReactions)
+	mux.HandleFunc("POST /api/chirps/{chirpID}/comments", apicfg.HandlerCreateComment)
+	mux.HandleFunc("GET /api/chirps/{chirpID}/comments", apicfg.HandlerGetComments)
+	mux.HandleFunc("DELETE /api/comments/{commentID}", apicfg.HandlerDeleteComment)
+	mux.HandleFunc("PUT /api/comments/{commentID}", apicfg.HandlerEditComment)
 
 	// start server
 	err = cardinalServer.ListenAndServe()

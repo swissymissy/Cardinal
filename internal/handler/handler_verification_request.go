@@ -26,14 +26,6 @@ func (apicfg *ApiConfig) HandlerRequestVerification(w http.ResponseWriter, r *ht
 		return
 	}
 
-	// generate new token
-	token, err := apicfg.DB.CreateVerificationToken(r.Context(), userID)
-	if err != nil {
-		fmt.Printf("Failed to create new token: %s\n", err)
-		ResponseWithError(w, 500, "Something went wrong.Try again")
-		return
-	}
-
 	// get user's email
 	user, err := apicfg.DB.GetUserByID(r.Context(), userID)
 	if err != nil {
@@ -43,6 +35,14 @@ func (apicfg *ApiConfig) HandlerRequestVerification(w http.ResponseWriter, r *ht
 		}
 		fmt.Printf("Error fetching user: %s\n", err)
 		ResponseWithError(w, 500, "Can't find user. Try again")
+		return
+	}
+
+	// generate new token
+	token, err := apicfg.DB.CreateVerificationToken(r.Context(), userID)
+	if err != nil {
+		fmt.Printf("Failed to create new token: %s\n", err)
+		ResponseWithError(w, 500, "Something went wrong.Try again")
 		return
 	}
 

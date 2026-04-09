@@ -7,7 +7,11 @@ import (
 )
 
 // check for length and language in chirp
-func CheckChirp(msg *Chirp) error {
+func CheckChirp(msg *Body) error {
+	// check empty string
+	if strings.TrimSpace(msg.Body) == "" {
+		return fmt.Errorf("Body cannot be empty")
+	}
 
 	// check length
 	if utf8.RuneCountInString(msg.Body) > 500 {
