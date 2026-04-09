@@ -11,8 +11,8 @@ import (
 	"github.com/swissymissy/Cardinal/internal/database"
 )
 
-func (apicfg *ApiConfig) HandlerRemoveReaction(w http.ResponseWriter, r *http.Request) {
-	//auth check
+func (apicfg *ApiConfig) HandlerDeleteComment(w http.ResponseWriter, r *http.Request) {
+	// auth check
 	// check user's token
 	accessToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
@@ -28,33 +28,34 @@ func (apicfg *ApiConfig) HandlerRemoveReaction(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// get chirpID from URL
-	chirpIDStr := r.PathValue("chirpID")
-	chirpID, err := uuid.Parse(chirpIDStr)
+	// get comment ID from URL
+	cmtIDStr := r.PathValue("commentID")
+	cmtID, err := uuid.Parse(cmtIDStr)
 	if err != nil {
-		fmt.Printf("Error parsing chirp ID from URL: %s\n", err)
+		fmt.Printf("Failed to parse comment ID from URL: %s\n", err)
 		ResponseWithError(w, 400, "Invalid ID")
 		return
 	}
-
-	// remove reaction
-	_, err = apicfg.DB.RemoveReaction(r.Context(), database.RemoveReactionParams{
-		ChirpID: chirpID,
-		UserID:  userID,
+	
+	// delete comment
+	// authorization check DB level
+	_, err = apicfg.DB.DeleteComment(r.Context(), database.DeleteCommentParams{
+		ID:     cmtID,
+		UserID: userID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			ResponseWithError(w, 404, "Reaction does not exist")
+			ResponseWithError(w, 404, "Comment not found")
 			return
 		}
-		fmt.Printf("Error deleting reaction: %s\n", err)
-		ResponseWithError(w, 500, "Failed to remove reaction.")
+		fmt.Printf("Error deleting comment: %s\n", err)
+		ResponseWithError(w, 500, "Failed to remove comment")
 		return
 	}
 
 	ResponseWithJSON(w, 200, struct {
 		Message string `json:"message"`
 	}{
-		Message: "Reaction removed",
+		Message: "Comment removed",
 	})
 }

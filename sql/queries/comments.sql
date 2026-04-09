@@ -26,3 +26,9 @@ RETURNING *;
 SELECT COUNT(*) AS count 
 FROM comments
 WHERE chirp_id = $1;
+
+-- name: GetCommentByID :one
+SELECT c.id, c.chirp_id, c.user_id, c.body, c.created_at, c.updated_at, u.username
+FROM comments c
+JOIN users u ON u.id = c.user_id
+WHERE c.id = $1;
