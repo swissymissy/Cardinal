@@ -6,6 +6,7 @@ import (
 	"github.com/wneessen/go-mail"
 )
 
+// send email to user
 func (wkrcfg *WorkerConfig) SendEmail(to, subject, body string) error {
 	// create email message
 	message := mail.NewMsg()
@@ -15,7 +16,7 @@ func (wkrcfg *WorkerConfig) SendEmail(to, subject, body string) error {
 	if err := message.To(to); err != nil {
 		return fmt.Errorf("Failed to set To address: %w", err)
 	}
-	message.Subject(subject))
+	message.Subject(subject)
 	message.SetBodyString(mail.TypeTextPlain, body)
 
 	// create client and send
