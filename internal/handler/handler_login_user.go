@@ -16,7 +16,7 @@ func (apicfg *ApiConfig) HandlerUserLogin(w http.ResponseWriter, r *http.Request
 	err := DecodeRequest(r, &user)
 	if err != nil {
 		fmt.Printf("Error decoding request: %s", err)
-		ResponseWithError(w, 500, "Something went wrong. Try again")
+		ResponseWithError(w, 400, "Invalid request")
 		return
 	}
 

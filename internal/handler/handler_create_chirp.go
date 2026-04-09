@@ -41,7 +41,7 @@ func (apicfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Reque
 	err = CheckChirp(&newChirp)
 	if err != nil {
 		fmt.Printf("%s\n", err)
-		ResponseWithError(w, 400, "Chirp is too long")
+		ResponseWithError(w, 400, err.Error())
 		return
 	}
 	// save new chirp to db
