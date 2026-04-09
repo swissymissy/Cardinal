@@ -110,3 +110,8 @@ type Comment struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type CommentSummary struct {
+	Total    int64     `json:"total"`
+	Comments []Comment `json:"comments"`
+}

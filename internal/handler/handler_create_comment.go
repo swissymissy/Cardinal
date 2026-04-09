@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
-	"errors"
-	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/swissymissy/Cardinal/internal/auth"

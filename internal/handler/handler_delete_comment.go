@@ -36,7 +36,7 @@ func (apicfg *ApiConfig) HandlerDeleteComment(w http.ResponseWriter, r *http.Req
 		ResponseWithError(w, 400, "Invalid ID")
 		return
 	}
-	
+
 	// delete comment
 	// authorization check DB level
 	_, err = apicfg.DB.DeleteComment(r.Context(), database.DeleteCommentParams{

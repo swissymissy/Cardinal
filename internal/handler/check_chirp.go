@@ -12,7 +12,7 @@ func CheckChirp(msg *Body) error {
 	if strings.TrimSpace(msg.Body) == "" {
 		return fmt.Errorf("Body cannot be empty")
 	}
-	
+
 	// check length
 	if utf8.RuneCountInString(msg.Body) > 500 {
 		return fmt.Errorf("Chirp is too long")
