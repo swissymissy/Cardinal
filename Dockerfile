@@ -1,5 +1,5 @@
 # stage 1: build
-FROM golang:1.23-alpine AS builder 
+FROM golang:1.25 AS builder
 
 WORKDIR /app
 
@@ -7,13 +7,15 @@ COPY go.mod go.sum ./
 RUN go mod download 
 
 COPY . .
-RUN go build -o cardinal .
 
+RUN CGO_ENABLED=0 GOOS=linux go build -o cardinal .
 # install goose binary
-RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+RUN CGO_ENABLED=0 go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # stage 2 - final image
 FROM alpine:latest 
+
+RUN apk add --no-cache ca-certificates
 
 WORKDIR /app 
 
@@ -25,6 +27,7 @@ COPY --from=builder /go/bin/goose /usr/local/bin/goose
 COPY --from=builder /app/index.html .
 COPY --from=builder /app/dashboard.html .
 COPY --from=builder /app/profile.html .
+COPY --from=builder /app/verified.html .
 COPY --from=builder /app/js ./js
 COPY --from=builder /app/css ./css
 

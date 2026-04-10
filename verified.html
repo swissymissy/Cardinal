@@ -5,8 +5,8 @@
   <title>Email Verification – Cardinal</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="form-page">
-  <div class="form-card" style="text-align:center">
+<body>
+  <div style="max-width:480px;margin:80px auto;text-align:center;padding:0 24px">
     <div id="content"></div>
   </div>
 
@@ -17,20 +17,19 @@
     if (!error) {
       content.innerHTML = `
         <h1 style="color:var(--red);margin-bottom:8px">Email Verified</h1>
-        <p style="color:var(--text-muted);margin-bottom:24px">Your email has been verified successfully.</p>
-        <a href="/login.html" class="btn btn-primary">Sign in</a>
+        <p style="color:var(--text-muted);margin-bottom:24px">Your email has been verified successfully. You can safely close this tab now.</p>
       `;
     } else if (error === "expired") {
       content.innerHTML = `
         <h1 style="color:var(--red);margin-bottom:8px">Link Expired</h1>
         <p style="color:var(--text-muted);margin-bottom:24px">Your verification link has expired. Go to your profile and request a new one.</p>
-        <a href="/dashboard.html" class="btn btn-primary">Go to Profile</a>
+        <a href="/dashboard.html" class="btn btn-primary">Go to Dashboard</a>
       `;
     } else {
       content.innerHTML = `
         <h1 style="color:var(--red);margin-bottom:8px">Invalid Link</h1>
         <p style="color:var(--text-muted);margin-bottom:24px">This verification link is invalid. Please request a new one from your profile.</p>
-        <a href="/dashboard.html" class="btn btn-primary">Go to Profile</a>
+        <a href="/dashboard.html" class="btn btn-primary">Go to Dashboard</a>
       `;
     }
   </script>
