@@ -1,3 +1,4 @@
 .env
 cardinal
 workers
+.env.docker

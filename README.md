@@ -17,6 +17,56 @@ Cardinal is a simple social media platform that lets users share their thoughts,
 
 ## Setup
 
+### Option A — Run with Docker (recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/swissymissy/Cardinal.git
+   cd Cardinal
+   ```
+
+2. **Create a Docker environment file**
+   ```bash
+   cp .env.example .env.docker
+   ```
+   Fill in the values. For Docker, the database host must use the service name, not localhost:
+   ```
+   DB_URL=postgres://postgres:postgres@postgres:5432/cardinal?sslmode=disable
+   RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+   DB_HOST=postgres
+   DB_PORT=5432
+   ```
+
+3. **Generate a JWT secret**
+   ```bash
+   openssl rand -base64 64
+   ```
+
+4. **Start all services**
+   ```bash
+   docker compose up --build
+   ```
+   This spins up PostgreSQL, RabbitMQ, the web server, and the workers in one command. Migrations run automatically on startup.
+
+5. **Visit the app**
+   ```
+   http://localhost:8080
+   ```
+
+To stop:
+```bash
+docker compose down
+```
+
+To rebuild after code changes:
+```bash
+docker compose up --build
+```
+
+---
+
+### Option B — Run locally (without Docker)
+
 1. **Clone the repository**
    ```bash
    git clone https://github.com/swissymissy/Cardinal.git
@@ -28,31 +78,39 @@ Cardinal is a simple social media platform that lets users share their thoughts,
    go mod tidy
    ```
 
-3. **Configure environment**
-
-   Copy `.env.example` to `.env` and fill in the values:
+3. **Create environment file**
    ```bash
    cp .env.example .env
    ```
+   Fill in the values. For local development, use `localhost` for database and RabbitMQ:
+   ```
+   DB_URL=postgres://user:password@localhost:5432/cardinal?sslmode=disable
+   RABBITMQ_URL=amqp://guest:guest@localhost:5672/
+   ```
 
-   Generate a JWT secret:
+4. **Generate a JWT secret**
    ```bash
    openssl rand -base64 64
    ```
 
-4. **Start RabbitMQ**
+5. **Start RabbitMQ**
    ```bash
    docker run -d --name rabbitmq -p 5672:5672 rabbitmq:3
    ```
 
-5. **Run database migrations**
+6. **Run database migrations**
    ```bash
-   goose -dir sql/schema postgres "YOUR_DB_URL" up
+   goose -dir sql/schema postgres "$DB_URL" up
    ```
 
-6. **Run the server**
+7. **Run the server**
    ```bash
    go run .
+   ```
+
+8. **Run the workers** (in a separate terminal)
+   ```bash
+   go run ./cmd/workers
    ```
 
 ---
@@ -160,3 +218,13 @@ Cardinal is a simple social media platform that lets users share their thoughts,
 | Messaging | RabbitMQ (AMQP) |
 | Auth | JWT + Argon2id |
 | Frontend | Vanilla JS / HTML / CSS |
+
+---
+
+## Future Features
+
+- **Profile picture** — upload and display a profile avatar
+- **Edit profile** — change password
+- **Password strength** — enforce strong passwords on registration
+- **Edit chirp** — allow users to edit their posted chirps
+- **Image attachments** — attach images to chirps
