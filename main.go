@@ -84,11 +84,11 @@ func main() {
 	}
 
 	// create handler
-	handler := http.FileServer(http.Dir("."))
-	mux.Handle("/", handler)
+	fileServer := http.FileServer(http.Dir("."))
+	mux.Handle("/", fileServer)
 
 	// handle request
-	mux.HandleFunc("GET /api/health", HandleHealthCheck)
+	mux.HandleFunc("GET /api/health", handler.HandlerHealthCheck)
 	mux.HandleFunc("POST /api/newuser", apicfg.HandlerCreateUser)
 	mux.HandleFunc("POST /admin/reset", apicfg.HandlerResetUsers)
 	mux.HandleFunc("POST /api/userlogin", apicfg.HandlerUserLogin)
