@@ -218,3 +218,13 @@ docker compose up --build
 | Messaging | RabbitMQ (AMQP) |
 | Auth | JWT + Argon2id |
 | Frontend | Vanilla JS / HTML / CSS |
+
+---
+
+## Future Features
+
+- **Profile picture** — upload and display a profile avatar
+- **Edit profile** — change password
+- **Password strength** — enforce strong passwords on registration
+- **Edit chirp** — allow users to edit their posted chirps
+- **Image attachments** — attach images to chirps
