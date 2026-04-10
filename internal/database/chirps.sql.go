@@ -53,10 +53,13 @@ func (q *Queries) DeleteOneChirp(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllChirps = `-- name: GetAllChirps :many
-SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username
+SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username, COUNT(DISTINCT r.user_id) AS reaction_count, COUNT(DISTINCT cm.id) AS comment_count
 FROM chirps c
 JOIN users u ON u.id = c.user_id
+LEFT JOIN reactions r ON r.chirp_id = c.id
+LEFT JOIN comments cm ON cm.chirp_id = c.id 
 WHERE c.created_at < $1
+GROUP BY c.id, u.username
 ORDER BY c.created_at DESC
 LIMIT $2
 `
@@ -67,12 +70,14 @@ type GetAllChirpsParams struct {
 }
 
 type GetAllChirpsRow struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Body      string
-	UserID    uuid.UUID
-	Username  string
+	ID            uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Body          string
+	UserID        uuid.UUID
+	Username      string
+	ReactionCount int64
+	CommentCount  int64
 }
 
 func (q *Queries) GetAllChirps(ctx context.Context, arg GetAllChirpsParams) ([]GetAllChirpsRow, error) {
@@ -91,6 +96,8 @@ func (q *Queries) GetAllChirps(ctx context.Context, arg GetAllChirpsParams) ([]G
 			&i.Body,
 			&i.UserID,
 			&i.Username,
+			&i.ReactionCount,
+			&i.CommentCount,
 		); err != nil {
 			return nil, err
 		}
@@ -106,11 +113,14 @@ func (q *Queries) GetAllChirps(ctx context.Context, arg GetAllChirpsParams) ([]G
 }
 
 const getAllChirpsFromUserID = `-- name: GetAllChirpsFromUserID :many
-SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username
+SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username, COUNT(DISTINCT r.user_id) AS reaction_count, COUNT(DISTINCT cm.id) AS comment_count
 FROM chirps c 
-JOIN users u ON u.id = c.user_id 
+JOIN users u ON u.id = c.user_id
+LEFT JOIN reactions r ON r.chirp_id = c.id 
+LEFT JOIN comments cm ON cm.chirp_id = c.id  
 WHERE c.user_id = $1
 AND c.created_at < $2
+GROUP BY c.id, u.username
 ORDER BY c.created_at DESC
 LIMIT $3
 `
@@ -122,12 +132,14 @@ type GetAllChirpsFromUserIDParams struct {
 }
 
 type GetAllChirpsFromUserIDRow struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Body      string
-	UserID    uuid.UUID
-	Username  string
+	ID            uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Body          string
+	UserID        uuid.UUID
+	Username      string
+	ReactionCount int64
+	CommentCount  int64
 }
 
 func (q *Queries) GetAllChirpsFromUserID(ctx context.Context, arg GetAllChirpsFromUserIDParams) ([]GetAllChirpsFromUserIDRow, error) {
@@ -146,6 +158,8 @@ func (q *Queries) GetAllChirpsFromUserID(ctx context.Context, arg GetAllChirpsFr
 			&i.Body,
 			&i.UserID,
 			&i.Username,
+			&i.ReactionCount,
+			&i.CommentCount,
 		); err != nil {
 			return nil, err
 		}
@@ -161,9 +175,19 @@ func (q *Queries) GetAllChirpsFromUserID(ctx context.Context, arg GetAllChirpsFr
 }
 
 const getFeedChirps = `-- name: GetFeedChirps :many
-SELECT c.id, c.created_at, c.updated_at, c.body, c.user_id, u.username
+SELECT 
+    c.id,
+    c.created_at,
+    c.updated_at,
+    c.body,
+    c.user_id,
+    u.username,
+    COUNT(DISTINCT r.user_id) AS reaction_count,
+    COUNT(DISTINCT cm.id) AS comment_count
 FROM chirps c 
 JOIN users u ON u.id = c.user_id
+LEFT JOIN reactions r ON r.chirp_id = c.id
+LEFT JOIN comments cm ON cm.chirp_id = c.id 
 WHERE (
     c.user_id = $1
     OR c.user_id IN (
@@ -171,6 +195,7 @@ WHERE (
     )
 )
 AND c.created_at < $2
+GROUP BY c.id, u.username
 ORDER BY c.created_at DESC
 LIMIT $3
 `
@@ -182,12 +207,14 @@ type GetFeedChirpsParams struct {
 }
 
 type GetFeedChirpsRow struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Body      string
-	UserID    uuid.UUID
-	Username  string
+	ID            uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Body          string
+	UserID        uuid.UUID
+	Username      string
+	ReactionCount int64
+	CommentCount  int64
 }
 
 func (q *Queries) GetFeedChirps(ctx context.Context, arg GetFeedChirpsParams) ([]GetFeedChirpsRow, error) {
@@ -206,6 +233,8 @@ func (q *Queries) GetFeedChirps(ctx context.Context, arg GetFeedChirpsParams) ([
 			&i.Body,
 			&i.UserID,
 			&i.Username,
+			&i.ReactionCount,
+			&i.CommentCount,
 		); err != nil {
 			return nil, err
 		}

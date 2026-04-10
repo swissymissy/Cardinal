@@ -49,12 +49,14 @@ func (apicfg *ApiConfig) HandlerGetFeed(w http.ResponseWriter, r *http.Request) 
 	list := []CreatedChirp{}
 	for _, c := range feedChirps {
 		list = append(list, CreatedChirp{
-			ID:        c.ID,
-			CreatedAt: c.CreatedAt,
-			UpdatedAt: c.UpdatedAt,
-			Body:      c.Body,
-			UserID:    c.UserID,
-			Username:  c.Username,
+			ID:            c.ID,
+			CreatedAt:     c.CreatedAt,
+			UpdatedAt:     c.UpdatedAt,
+			Body:          c.Body,
+			UserID:        c.UserID,
+			Username:      c.Username,
+			ReactionCount: c.ReactionCount,
+			CommentCount:  c.CommentCount,
 		})
 	}
 	ResponseWithJSON(w, http.StatusOK, list)

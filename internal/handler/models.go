@@ -42,12 +42,14 @@ type Body struct {
 }
 
 type CreatedChirp struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Body      string    `json:"body"`
-	UserID    uuid.UUID `json:"user_id"`
-	Username  string    `json:"username"`
+	ID            uuid.UUID `json:"id"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	Body          string    `json:"body"`
+	UserID        uuid.UUID `json:"user_id"`
+	Username      string    `json:"username"`
+	ReactionCount int64     `json:"reaction_count"`
+	CommentCount  int64     `json:"comment_count"`
 }
 
 type ResponseAccessToken struct {
