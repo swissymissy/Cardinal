@@ -28,6 +28,7 @@ COPY --from=builder /app/index.html .
 COPY --from=builder /app/dashboard.html .
 COPY --from=builder /app/profile.html .
 COPY --from=builder /app/verified.html .
+COPY --from=builder /app/assets ./assets
 COPY --from=builder /app/js ./js
 COPY --from=builder /app/css ./css
 
