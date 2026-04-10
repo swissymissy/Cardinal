@@ -30,7 +30,6 @@ func (wkrcfg *WorkerConfig) HandlerDirectEmail(event pubsub.DirectEvent) pubsub.
 		body = fmt.Sprintf("User %s has started following you! Yay!", event.Username)
 	}
 
-	
 	if err := wkrcfg.SendEmail(user.Email, subject, body); err != nil {
 		fmt.Printf("Failed to send email to %s: %s\n", user.Email, err)
 		return pubsub.NackRequeue

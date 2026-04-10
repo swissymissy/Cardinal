@@ -1,16 +1,16 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
-	"context"
-	"time"
 	"syscall"
-	"log"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"

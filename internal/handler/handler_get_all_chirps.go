@@ -42,8 +42,14 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 		}
 		for _, c := range rows {
 			list = append(list, CreatedChirp{
-				ID: c.ID, CreatedAt: c.CreatedAt, UpdatedAt: c.UpdatedAt,
-				Body: c.Body, UserID: c.UserID, Username: c.Username,
+				ID:            c.ID,
+				CreatedAt:     c.CreatedAt,
+				UpdatedAt:     c.UpdatedAt,
+				Body:          c.Body,
+				UserID:        c.UserID,
+				Username:      c.Username,
+				ReactionCount: c.ReactionCount,
+				CommentCount:  c.CommentCount,
 			})
 		}
 	} else {
@@ -63,8 +69,14 @@ func (apicfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Requ
 		}
 		for _, c := range rows {
 			list = append(list, CreatedChirp{
-				ID: c.ID, CreatedAt: c.CreatedAt, UpdatedAt: c.UpdatedAt,
-				Body: c.Body, UserID: c.UserID, Username: c.Username,
+				ID:            c.ID,
+				CreatedAt:     c.CreatedAt,
+				UpdatedAt:     c.UpdatedAt,
+				Body:          c.Body,
+				UserID:        c.UserID,
+				Username:      c.Username,
+				ReactionCount: c.ReactionCount,
+				CommentCount:  c.CommentCount,
 			})
 		}
 	}
