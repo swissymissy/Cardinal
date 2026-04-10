@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
+	"context"
+	"time"
+	"syscall"
+	"log"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -71,19 +76,19 @@ func main() {
 
 	// server mux
 	mux := http.NewServeMux()
-	// server
+	// create http server
 	address := fmt.Sprintf(":%s", port)
 	cardinalServer := http.Server{
 		Addr:    address,
 		Handler: mux,
 	}
-	fmt.Printf("Serving on: http://localhost:%s\n", port)
 
 	// create handler
-	handler := http.FileServer(http.Dir("."))
-	mux.Handle("/", handler)
+	fileServer := http.FileServer(http.Dir("."))
+	mux.Handle("/", fileServer)
 
 	// handle request
+	mux.HandleFunc("GET /api/health", handler.HandlerHealthCheck)
 	mux.HandleFunc("POST /api/newuser", apicfg.HandlerCreateUser)
 	mux.HandleFunc("POST /admin/reset", apicfg.HandlerResetUsers)
 	mux.HandleFunc("POST /api/userlogin", apicfg.HandlerUserLogin)
@@ -112,11 +117,27 @@ func main() {
 	mux.HandleFunc("DELETE /api/comments/{commentID}", apicfg.HandlerDeleteComment)
 	mux.HandleFunc("PUT /api/comments/{commentID}", apicfg.HandlerEditComment)
 
-	// start server
-	err = cardinalServer.ListenAndServe()
-	if err != nil {
-		fmt.Println("Error listening and serve")
-		return
+	// run server in background
+	go func() {
+		fmt.Printf("Serving on: http://localhost:%s\n", port)
+		if err := cardinalServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("HTTP server error: %s\n", err)
+		}
+	}()
+
+	// this blocks until OS sends SIGTERM or SIGINT
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	log.Println("Shutting down server...")
+
+	// give in-flight requests up to 10s to finish
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+
+	if err := cardinalServer.Shutdown(shutdownCtx); err != nil {
+		log.Fatalf("HTTP shutdown error. Forced shutdown: %s\n", err)
 	}
-	return
+	log.Println("Graceful shutdown complete")
 }
