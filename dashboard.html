@@ -134,16 +134,48 @@
       const html = chirps.map(chirp => `
         <div class="chirp-card" id="chirp-${chirp.id}">
           <div class="chirp-card-header">
-            <a class="chirp-author" href="/profile.html?user=${chirp.user_id}">@${escapeHTML(chirp.username)}</a>
+            <a class="chirp-author" href="/profile.html?user=${escapeHTML(chirp.user_id)}">@${escapeHTML(chirp.username)}</a>
             <div style="display:flex;align-items:center;gap:8px">
               <span class="chirp-time">${formatTime(chirp.created_at)}</span>
               ${chirp.user_id === myID ? `<button class="btn btn-sm btn-danger" onclick="deleteChirp('${chirp.id}')">Delete</button>` : ""}
             </div>
           </div>
           <div class="chirp-body">${escapeHTML(chirp.body)}</div>
-          <div class="reaction-bar" id="reactions-${chirp.id}"></div>
-          <div class="reactor-list" id="reactor-list-${chirp.id}"></div>
-          <div class="comment-bar" id="comment-bar-${chirp.id}"></div>
+
+          <!-- reaction bar -->
+          <div class="reaction-bar" id="reactions-${chirp.id}" data-user-reaction="">
+            <span class="reaction-summary" onclick="toggleReactionPanel('${chirp.id}'); event.stopPropagation()">
+              <span id="reaction-icon-${chirp.id}">❤️</span>
+              <span id="reaction-count-${chirp.id}">${chirp.reaction_count || 0}</span>
+              ›
+            </span>
+          </div>
+          
+          <!-- reaction panel -->
+          <div class="reaction-panel" id="reaction-panel-${chirp.id}" style="display:none">
+              <div class="reaction-picker-row">
+                  ${REACTIONS.map(emoji => `
+                      <button
+                          class="reaction-emoji-btn"
+                          id="react-${chirp.id}-${encodeURIComponent(emoji)}"
+                          data-chirp="${chirp.id}"
+                          data-type="${emoji}"
+                          onclick="toggleReaction(this.dataset.chirp, this.dataset.type)">
+                          ${emoji}
+                      </button>
+                  `).join('')}
+              </div>
+              <div class="reactor-list" id="reactor-list-${chirp.id}">
+                  <div style="color:var(--text-muted);font-size:0.85rem">Loading...</div>
+              </div>
+          </div>
+      
+          <!-- comment bar -->
+          <div class="comment-bar" id="comment-bar-${chirp.id}">
+                <span class="comment-toggle" onclick="toggleComments('${chirp.id}')">
+                    💬 ${chirp.comment_count || 0} comment${chirp.comment_count !== 1 ? 's' : ''} ›
+                </span>
+          </div>
           <div class="comment-section" id="comment-section-${chirp.id}"></div>
         </div>
       `).join("");
@@ -153,11 +185,6 @@
       } else {
         feed.innerHTML = html;
       }
-
-      chirps.forEach(c => {
-        loadReactions(c.id);
-        loadComments(c.id);
-      });
     }
 
     const REACTIONS = ['❤️', '😂', '😮', '😢', '👍'];
@@ -166,78 +193,86 @@
       const res = await apiRequestAuth(`/api/chirps/${chirpId}/react`, 'GET');
       if (!res || !res.ok) return;
       const data = await res.json();
+
       const bar = document.getElementById(`reactions-${chirpId}`);
       if (!bar) return;
+      bar.dataset.userReaction = data.user_reaction || ''
 
-      const countMap = {};
-      (data.counts || []).forEach(c => countMap[c.type] = c.count);
-      bar.dataset.userReaction = data.user_reaction || '';
+      // update summary button icon — shows user's reaction or ❤️ as default
+      const iconEl = document.getElementById(`reaction-icon-${chirpId}`)
+      if (iconEl) iconEl.textContent = data.user_reaction || '❤️'
 
-      const total = data.total || 0;
-      const totalHTML = total > 0
-        ? `<span class="reaction-total" onclick="toggleReactorList('${chirpId}')">${total} reaction${total !== 1 ? 's' : ''} ›</span>`
-        : '';
+      // update total count
+      const countEl = document.getElementById(`reaction-count-${chirpId}`)
+      if (countEl) countEl.textContent = data.total || 0
 
-      const activeEmojis = REACTIONS.filter(emoji => countMap[emoji] > 0 || data.user_reaction === emoji);
-      const buttonsHTML = activeEmojis.map(emoji => {
-        const count = countMap[emoji] || 0;
-        const active = data.user_reaction === emoji ? ' active' : '';
-        return `<button class="reaction-btn${active}" data-chirp="${chirpId}" data-type="${emoji}" onclick="toggleReaction(this.dataset.chirp, this.dataset.type)">${emoji}${count > 0 ? ` ${count}` : ''}</button>`;
-      }).join('');
+      // highlight active emoji in picker
+      for (const emoji of REACTIONS) {
+          const btn = document.getElementById(`react-${chirpId}-${encodeURIComponent(emoji)}`)
+          if (btn) btn.classList.toggle('active', data.user_reaction === emoji)
+      }   
+      // render reactor list grouped by type with counts
+      const reactorList = document.getElementById(`reactor-list-${chirpId}`)
+      if (!reactorList) return   
 
-      const pickerHTML = `
-        <button class="reaction-picker-btn" onclick="togglePicker('${chirpId}')">+</button>
-        <div class="reaction-picker" id="picker-${chirpId}">
-          ${REACTIONS.map(emoji => `<button class="reaction-btn" data-chirp="${chirpId}" data-type="${emoji}" onclick="toggleReaction(this.dataset.chirp, this.dataset.type)">${emoji}</button>`).join('')}
-        </div>`;
+      if (!data.reactors || data.reactors.length === 0) {
+          reactorList.innerHTML = `
+              <div style="color:var(--text-muted);font-size:0.85rem">
+                  No reactions yet
+              </div>`
+          return
+      }
 
-      bar.innerHTML = buttonsHTML + pickerHTML + totalHTML;
+      // group reactors by emoji type
+      const grouped = {}
+      for (const r of data.reactors) {
+          if (!grouped[r.type]) grouped[r.type] = []
+          grouped[r.type].push(r)
+      }
+      
+      reactorList.innerHTML = Object.entries(grouped).map(([type, users]) => `
+          <div class="reactor-group">
+              <span class="reactor-group-label">
+                  ${type} ${users.length}
+              </span>
+              <span class="reactor-group-users">
+                  ${users.map(u =>
+                      `<a href="/profile.html?user=${u.user_id}">@${escapeHTML(u.username)}</a>`
+                  ).join(', ')}
+              </span>
+          </div>
+      `).join('')
+    }
 
-      const reactorList = document.getElementById(`reactor-list-${chirpId}`);
-      if (reactorList) {
-        reactorList.dataset.reactors = JSON.stringify(data.reactors || []);
-        if (reactorList.classList.contains('open')) {
-          renderReactorList(chirpId, data.reactors || []);
+    async function toggleReactionPanel(chirpId) {
+        const panel = document.getElementById(`reaction-panel-${chirpId}`)
+        if (!panel) return
+
+        const isOpen = panel.style.display !== 'none'
+        if (isOpen) {
+            panel.style.display = 'none'
+            return
         }
-      }
-    }
 
-    function togglePicker(chirpId) {
-      document.getElementById(`picker-${chirpId}`)?.classList.toggle('open');
-    }
-
-    function renderReactorList(chirpId, reactors) {
-      const list = document.getElementById(`reactor-list-${chirpId}`);
-      if (!list) return;
-      list.innerHTML = reactors.length === 0
-        ? `<div style="color:var(--text-muted)">No reactions yet</div>`
-        : reactors.map(r =>
-            `<div class="reactor-item"><a href="/profile.html?user=${r.user_id}">@${escapeHTML(r.username)}</a> ${r.type}</div>`
-          ).join('');
-    }
-
-    function toggleReactorList(chirpId) {
-      const list = document.getElementById(`reactor-list-${chirpId}`);
-      if (!list) return;
-      if (list.classList.contains('open')) {
-        list.classList.remove('open');
-        return;
-      }
-      const reactors = JSON.parse(list.dataset.reactors || '[]');
-      renderReactorList(chirpId, reactors);
-      list.classList.add('open');
-    }
-
+        panel.style.display = 'block'
+        await loadReactions(chirpId)
+    }    
+    
     async function toggleReaction(chirpId, type) {
       const bar = document.getElementById(`reactions-${chirpId}`);
       const current = bar?.dataset.userReaction;
+
       if (current === type) {
+        // same reaction → remove it → icon goes back to ❤️
         const res = await apiRequestAuth(`/api/chirps/${chirpId}/react`, 'DELETE');
         if (!res || !res.ok) return;
       } else {
+        // new or different reaction → add/update
         const res = await apiRequestAuth(`/api/chirps/${chirpId}/react`, 'POST', { type });
         if (!res || !res.ok) return;
       }
+
+      // refresh — icon updates to new reaction automatically
       await loadReactions(chirpId);
     }
 
@@ -260,16 +295,18 @@
       }
     }
 
-    function toggleComments(chirpId) {
+    // fetch comments when section first opens
+    async function toggleComments(chirpId) {
       const section = document.getElementById(`comment-section-${chirpId}`);
       if (!section) return;
+
       if (section.classList.contains('open')) {
         section.classList.remove('open');
         return;
       }
-      const comments = JSON.parse(section.dataset.comments || '[]');
-      renderComments(chirpId, comments);
+
       section.classList.add('open');
+      await loadComments(chirpId);
     }
 
     function renderComments(chirpId, comments) {
@@ -375,6 +412,14 @@
       }
     });
 
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.reaction-bar') && !e.target.closest('.reaction-panel')) {
+        document.querySelectorAll('.reaction-panel').forEach(p => {
+          p.style.display = 'none';
+        });
+      }
+    });
+
     async function loadChirps(append = false) {
       let chirps = [];
 
@@ -386,7 +431,8 @@
         if (chirps.length > 0) followingCursor = chirps[chirps.length - 1].created_at;
       } else {
         const before = discoverCursor ? `&bf=${encodeURIComponent(discoverCursor)}` : "";
-        const res = await fetch(`/api/getallchirps?sort=desc${before}`);
+        const res = await apiRequestAuth(`/api/getallchirps?sort=desc${before}`, 'GET');
+
         if (!res.ok) return;
         chirps = await res.json();
         if (chirps.length > 0) discoverCursor = chirps[chirps.length - 1].created_at;
