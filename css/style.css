@@ -453,70 +453,92 @@ a:hover {
   flex-wrap: wrap;
 }
 
-.reaction-btn {
-  background: transparent;
-  border: none;
-  border-radius: 99px;
-  padding: 3px 8px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.1s;
+/* reaction summary button */
+.reaction-summary {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 3px 10px;
+    border-radius: 99px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    transition: all 0.15s;
+    background: none;
 }
 
-.reaction-btn:hover { background: #fee2e2; }
-
-.reaction-btn.active {
-  background: #fee2e2;
-  font-weight: 600;
+.reaction-summary:hover {
+    color: var(--red);
 }
 
-.reaction-picker-btn {
-  background: transparent;
-  border: none;
-  font-size: 0.9rem;
-  cursor: pointer;
-  color: var(--text-muted);
-  padding: 3px 6px;
-  border-radius: 99px;
-  transition: background 0.1s;
+/* reaction panel — expands below */
+.reaction-panel {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
 }
 
-.reaction-picker-btn:hover { background: #fee2e2; color: var(--red); }
-
-.reaction-picker {
-  display: none;
-  gap: 2px;
+/* emoji picker row inside panel */
+.reaction-picker-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
 }
 
-.reaction-picker.open { display: flex; }
-
-.reaction-total {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  margin-left: 4px;
+/* individual emoji buttons */
+.reaction-emoji-btn {
+    background: none;
+    border: none;
+    outline: none;
+    border-radius: 99px;
+    padding: 4px 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.15s;
 }
 
-.reaction-total:hover { color: var(--red); }
-
-.reactor-list {
-  display: none;
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 0.85rem;
+.reaction-emoji-btn:hover {
+    background: #fee2e2;
+    transform: scale(1.15);
 }
 
-.reactor-list.open { display: block; }
-
-.reactor-item {
-  padding: 4px 0;
-  border-bottom: 1px solid var(--border);
+.reaction-emoji-btn.active {
+    background: #fee2e2;
+    outline: 1px solid var(--red);
 }
 
-.reactor-item:last-child { border-bottom: none; }
+/* reactor group — emoji + count + usernames */
+.reactor-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.reactor-group:last-child {
+    border-bottom: none;
+}
+
+.reactor-group-label {
+    font-size: 0.95rem;
+    min-width: 44px;
+}
+
+.reactor-group-users {
+    color: var(--text-muted);
+}
+
+.reactor-group-users a {
+    color: var(--red);
+    font-weight: 500;
+}
 
 /* COMMENTS */
 .comment-bar {
