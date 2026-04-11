@@ -2,7 +2,7 @@
 
 Cardinal is a simple social media platform that lets users share their thoughts, react to posts, comment, follow others, and stay connected.
 
-**Motivation:** Inspired by the Chirpy project from Boot.dev, Cardinal expands on that foundation with more features to get closer to a real social media platform like Twitter.
+**Motivation:** Inspired by the Chirpy project from Boot.dev, Cardinal expands on that foundation with more features to get closer to a real social media platform like Twitter/Facebook.
 
 ---
 
@@ -65,8 +65,8 @@ docker compose up --build
 
 ---
 
-### Option B — Run locally (without Docker)
-
+### Option B — Manually run the Web Server, Workers and Rabbitmq Server 
+In case you want to run each one separately for testing without having to do docker-compose up --build everytime.
 1. **Clone the repository**
    ```bash
    git clone https://github.com/swissymissy/Cardinal.git
@@ -81,6 +81,27 @@ docker compose up --build
 3. **Create environment file**
    ```bash
    cp .env.example .env
+   ```
+   ```
+   # Server
+   PORT="8080"
+   PLATFORM="dev"
+   BASE_URL="http://localhost:8080"
+   
+   # Database
+   DB_URL="postgres://user:password@localhost:5432/cardinal?sslmode=disable"
+   
+   # Auth
+   JWT_SECRET="your_generated_jwt_secret_here"
+   
+   # RabbitMQ
+   RABBITMQ_URL="amqp://guest:guest@localhost:5672/""
+   
+   # SMTP (email notifications)
+   SMTP_HOST="your_smtp_host"
+   SMTP_PORT="587"
+   SMTP_USERNAME="your_email@gmail.com"
+   SMTP_PASSWORD="your_gmail_app_password"
    ```
    Fill in the values. For local development, use `localhost` for database and RabbitMQ:
    ```
@@ -112,6 +133,11 @@ docker compose up --build
    ```bash
    go run ./cmd/workers
    ```
+   
+9. **Visit the app**
+```
+http://localhost:8080
+```
 
 ---
 
@@ -125,7 +151,7 @@ docker compose up --build
 | Comments | Comment on any chirp |
 | Reactions | React to chirps with emoji |
 | Follow | Follow other users to build your feed |
-| Notifications | In-app and email notifications for new chirps from followed users |
+| Notifications | In-app and email notifications for new chirps from followed users, new comments, reactions, followers to user |
 | Email Verification | Verify your email address on sign-up |
 
 ---
@@ -217,14 +243,16 @@ docker compose up --build
 | Migrations | Goose |
 | Messaging | RabbitMQ (AMQP) |
 | Auth | JWT + Argon2id |
-| Frontend | Vanilla JS / HTML / CSS |
+| Frontend | JS / HTML / CSS |
 
 ---
 
 ## Future Features
-
 - **Profile picture** — upload and display a profile avatar
 - **Edit profile** — change password
 - **Password strength** — enforce strong passwords on registration
 - **Edit chirp** — allow users to edit their posted chirps
 - **Image attachments** — attach images to chirps
+
+## Collaboration
+I am still actively working on this project as I love making it becomes closer to a social media application. Therefore, I plan to add more features to improve the project. If you are interested in contributing, I'd love to collab and build together. Feel free to contact me! ```nghihoang0697@gmail.com```
